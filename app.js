@@ -177,7 +177,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 for (const movie of moviesWithDetails) {
                     const movieDiv = document.createElement('div');
                     movieDiv.className = 'rated-movie';
-                    movieDiv.style.backgroundImage = `url(${movie.Poster})`; // Apply background image
+                    movieDiv.style.background = `linear-gradient(rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.5)), url(${movie.Poster})`; // Apply background image
 
                     // Load the image and get the color
                     try {
@@ -189,7 +189,7 @@ document.addEventListener('DOMContentLoaded', () => {
                         movieDiv.innerHTML = `
                             <div class="content">
                                 <img src="${movie.Poster}" alt="${movie.Title}" class="movie-poster" data-id="${movie.imdbID}">
-                                <div class="text-container" style="color: ${textColor};">
+                                <div class="text-container" style="color: #ffffff;">
                                     <strong>${movie.Title}</strong>
                                     <p>Rating: ${JSON.parse(localStorage.getItem(movie.imdbID)).rating}/5</p>
                                 </div>
