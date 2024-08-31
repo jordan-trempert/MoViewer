@@ -85,7 +85,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
                     // Fetch movie details from OMDb API
                     try {
-                        const response = await fetch(`http://www.omdbapi.com/?i=${imdbID}&apikey=${apiKey}`);
+                        const response = await fetch(`https://www.omdbapi.com/?i=${imdbID}&apikey=${apiKey}`);
                         const movieData = await response.json();
 
                         if (movieData.Response === 'True') {
@@ -132,7 +132,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 // Fetch movie details from OMDb API for each rated movie
                 try {
                     const movieDetailsPromises = ratedMovies.map(async movie => {
-                        const response = await fetch(`http://www.omdbapi.com/?i=${movie.imdbID}&apikey=${apiKey}`);
+                        const response = await fetch(`https://www.omdbapi.com/?i=${movie.imdbID}&apikey=${apiKey}`);
                         return response.json();
                     });
 
@@ -269,7 +269,7 @@ function searchMovies(query) {
 
 
     const apiKey = '97910366'; // Replace with your OMDb API key
-    const url = `http://www.omdbapi.com/?s=${query}&apikey=${apiKey}`;
+    const url = `https://www.omdbapi.com/?s=${query}&apikey=${apiKey}`;
 
     // Reset movie details and show search results
     document.getElementById('movie-details').style.display = 'none';
@@ -346,7 +346,7 @@ function handleMovieClick() {
 
 function fetchMovieTitle(imdbID) {
     const apiKey = '97910366'; // Replace with your OMDb API key
-    const url = `http://www.omdbapi.com/?i=${imdbID}&apikey=${apiKey}`;
+    const url = `https://www.omdbapi.com/?i=${imdbID}&apikey=${apiKey}`;
 
     return fetch(url)
         .then(response => response.json())
@@ -372,7 +372,7 @@ function fetchMovieTitle(imdbID) {
 
 function fetchMovieDetails(imdbID) {
     const apiKey = '97910366'; // Replace with your OMDb API key
-    const url = `http://www.omdbapi.com/?i=${imdbID}&apikey=${apiKey}`;
+    const url = `https://www.omdbapi.com/?i=${imdbID}&apikey=${apiKey}`;
 
     fetch(url)
         .then(response => response.json())
