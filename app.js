@@ -189,7 +189,7 @@ document.addEventListener('DOMContentLoaded', () => {
                         movieDiv.innerHTML = `
                             <div class="content">
                                 <img src="${movie.Poster}" alt="${movie.Title}" class="movie-poster" data-id="${movie.imdbID}">
-                                <div class="text-container" style="color: #ffffff;">
+                                <div class="text-container" style="color: ${textColor};">
                                     <strong>${movie.Title}</strong>
                                     <p>Rating: ${JSON.parse(localStorage.getItem(movie.imdbID)).rating}/5</p>
                                 </div>
