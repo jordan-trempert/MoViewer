@@ -1,0 +1,317 @@
+body {
+    font-family: 'Arial', sans-serif;
+    background-color: #f4f4f4;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    position: relative; /* Ensure positioning context for the pseudo-element */
+    background-image: url("background.jpg");
+
+}
+
+body::before {
+    content: '';
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: var(--bg-image);
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+    filter: blur(10px);
+    z-index: 0; /* Behind the content */
+    opacity: 0;
+    transition: opacity 0.5s ease-in-out;
+}
+
+body.show-bg::before {
+    opacity: 1;
+}
+
+.container {
+    max-width: 900px;
+    width: 100%;
+    background: rgba(255,255,255, 0.7);
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    text-align: center;
+    position: relative; /* Keep it above the pseudo-element */
+    z-index: 1; /* Ensure container is above the pseudo-element */
+    margin-top: 40px; /* Add this line to ensure space from the top */
+    margin-bottom: 40px; /* Add this line to ensure space from the top */
+
+}
+
+
+
+}
+
+h1 {
+    margin-bottom: 20px;
+    color: #333;
+}
+
+form {
+    margin-bottom: 20px;
+}
+
+
+input[type="text"] {
+    padding: 10px;
+    width: 80%;
+    max-width: 500px;
+    margin-right: 20px; /* Adds space between the search input and the buttons */
+}
+
+button {
+    padding: 10px 20px;
+    background: #007bff;
+    color: #fff;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    margin: 0;
+}
+
+button:hover {
+    background: #0056b3;
+}
+#movie-list {
+    list-style-type: none;
+    padding: 0;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    justify-content: center;
+}
+
+#movie-list li {
+    background: #f9f9f9;
+    padding: 10px;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    cursor: pointer;
+    transition: transform 0.2s;
+
+}
+
+#movie-list img{
+    border-radius: 20px;
+}
+
+#movie-list img:hover {
+    transform: scale(1.05);
+    box-shadow: 5px 5px 5px gray;
+
+}
+
+#movie-details {
+    display: none;
+    text-align: center;
+    margin-top: 20px;
+}
+
+.detail-box {
+    background: #f9f9f9;
+    padding: 15px;
+    margin: 10px auto;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    max-width: 800px;
+    text-align: left;
+    display: inline-block;
+}
+
+.detail-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 10px;
+}
+
+#movie-poster {
+    max-width: 300px;
+    border-radius: 4px;
+    display: inline-block;
+}
+
+#movie-rating {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    margin-top: 20px;
+}
+
+#rating {
+    margin-top: 10px;
+    padding: 5px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+}
+
+#rating-response {
+    margin-top: 10px;
+    font-weight: bold;
+}
+
+
+#movie-details img {
+    max-width: 300px;
+    border-radius: 4px;
+    display: block;
+    margin-left: auto;
+    margin-right: auto;
+    opacity: 100%;
+
+}
+
+
+.rating {
+    display: flex;
+    font-size: 2rem;
+    direction: rtl; /* Ensure stars are ordered from left to right */
+}
+
+.rating input {
+    display: none;
+}
+
+.rating .star {
+    cursor: pointer;
+    position: relative;
+    color: gray;
+}
+
+.rating .star:before {
+    content: "\2605"; /* Star character */
+    display: inline-block;
+}
+
+.rating input:checked ~ .star,
+.rating input:checked ~ .star ~ .star {
+    color: gold;
+}
+
+.rating .star.half:before {
+    content: "\2605"; /* Full star */
+    position: absolute;
+    width: 50%;
+    overflow: hidden;
+    color: gold;
+}
+
+.rating input:checked ~ .star.half {
+    color: gold;
+}
+
+.rating .star:hover,
+.rating .star:hover ~ .star {
+    color: gold;
+}
+
+.rating .star.half:hover:before {
+    content: "\2605"; /* Full star */
+    position: absolute;
+    width: 50%;
+    overflow: hidden;
+    color: gold;
+}
+
+/* Rated Movies */
+#rated-movie-container {
+    display: flex;
+    flex-direction: column;
+    gap: 20px; /* Adds space between each movie box */
+}
+
+.rated-movie {
+    display: flex;
+    align-items: center;
+    background: #fff;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    padding: 10px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.movie-poster {
+    width: 100px;
+    height: auto;
+    border-radius: 4px;
+    margin-right: 20px; /* Space between image and text */
+}
+
+.movie-poster:hover {
+    transform: scale(1.05);
+    box-shadow: 5px 5px 5px gray;
+}
+
+.text-container {
+    display: flex;
+    flex-direction: column;
+}
+
+.text-container strong {
+    font-size: 1.2em;
+    margin-bottom: 5px;
+}
+
+.text-container p {
+    margin: 0;
+}
+
+
+.wrapper{
+   border: 2px green;
+}
+
+#rated-movie-container {
+    display: flex;
+    flex-direction: column;
+    gap: 20px; /* Adds space between each movie box */
+    align-items: center; /* Center the movie boxes horizontally */
+}
+
+.rated-movie {
+    display: flex;
+    align-items: flex-start; /* Align items to the start */
+    background: #fff;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    padding: 10px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    width: 100%; /* Make sure the box stretches to fit the container */
+    max-width: 900px; /* Set a max width to keep boxes from becoming too wide */
+    box-sizing: border-box; /* Include padding and border in the element's total width and height */
+}
+
+.movie-poster {
+    width: 100px;
+    height: auto;
+    border-radius: 4px;
+    margin-right: 20px; /* Space between image and text */
+    margin-left: 30%; /* Space between image and text */
+}
+
+.text-container {
+    display: flex;
+    flex-direction: column;
+    justify-content: center; /* Center the text vertically in the container */
+    margin-top: 5%;
+}
+
+.text-container strong {
+    font-size: 1.2em;
+    margin-bottom: 5px;
+    text-align: center; /* Center text inside the container */
+}
+
+.text-container p {
+    margin: 0;
+    text-align: center; /* Center text inside the container */
+}

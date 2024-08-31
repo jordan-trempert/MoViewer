@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MoViewer</title>
+    <link rel="icon" href="favicon.ico" type="image/x-icon">
+    <link rel="icon" href="favicon.png" type="image/png">
+
+    <link rel="stylesheet" href="styles.css">
+    <script src="https://cdn.jsdelivr.net/npm/colorthief@2.3.2/dist/color-thief.umd.min.js"></script>
+</head>
+<body>
+<div class="container">
+    <h1>MoViewer</h1>
+    <form id="search-form">
+        <input type="text" id="search-input" placeholder="Enter movie title" required>
+        <br></br>
+        <button type="submit">Search</button>
+        <button type="button" id="view-rated-movies">View Rated Movies</button>
+
+
+    </form>
+    <ul id="movie-list"></ul>
+    <div id="movie-details">
+        <h2 id="movie-title"></h2>
+        <img id="movie-poster" src="" alt="Movie Poster">
+        <div id="wrapper">
+            <div class="detail-box">
+                <p id="movie-year"></p>
+            </div>
+            <div class="detail-box">
+                <p id="movie-rated"></p>
+            </div>
+            <div class="detail-box">
+                <p id="movie-runtime"></p>
+            </div>
+            <div class="detail-box">
+                <p id="movie-genre"></p>
+            </div>
+        </div>
+        <div class="detail-box">
+            <p id="movie-director"></p>
+        </div>
+        <div class="detail-box">
+            <p id="movie-writer"></p>
+        </div>
+        <div class="detail-box">
+            <p id="movie-actors"></p>
+        </div>
+        <div class="detail-box">
+            <p id="movie-plot"></p>
+        </div>
+        <div class="detail-box">
+            <p id="movie-language"></p>
+        </div>
+        <div class="detail-box">
+            <p id="movie-country"></p>
+        </div>
+        <div class="detail-box">
+            <p id="movie-awards"></p>
+        </div>
+        <div class="detail-box">
+            <p id="movie-boxoffice"></p>
+        </div>
+
+        <div class="detail-box" id="movie-rating">
+            <label>Rate this movie:</label>
+            <div class="rating">
+                <input type="radio" name="rating" id="star5" value="5" />
+                <label for="star5" class="star"></label>
+                <input type="radio" name="rating" id="star4half" value="4.5" />
+                <label for="star4half" class="star half"></label>
+                <input type="radio" name="rating" id="star4" value="4" />
+                <label for="star4" class="star"></label>
+                <input type="radio" name="rating" id="star3half" value="3.5" />
+                <label for="star3half" class="star half"></label>
+                <input type="radio" name="rating" id="star3" value="3" />
+                <label for="star3" class="star"></label>
+                <input type="radio" name="rating" id="star2half" value="2.5" />
+                <label for="star2half" class="star half"></label>
+                <input type="radio" name="rating" id="star2" value="2" />
+                <label for="star2" class="star"></label>
+                <input type="radio" name="rating" id="star1half" value="1.5" />
+                <label for="star1half" class="star half"></label>
+                <input type="radio" name="rating" id="star1" value="1" />
+                <label for="star1" class="star"></label>
+            </div>
+            <p id="rating-response"></p>
+            <button id="submit-rating">Submit Rating</button>
+        </div>
+    </div>
+
+    <!-- Rated Movies Section -->
+    <section id="rated-movies" style="display: none;">
+        <label for="sort-movies">Sort by:</label>
+        <select id="sort-movies">
+            <option value="name">Name</option>
+            <option value="rating">Rating</option>
+        </select>
+        <h2>Your Rated Movies</h2>
+        <ul id="rated-movie-container" class="rated-movie-list"></ul>
+    </section>
+
+</div>
+
+<script src="app.js"></script>
+</body>
+</html>
