@@ -248,7 +248,7 @@ button:hover {
 
 .movie-poster:hover {
     transform: scale(1.05);
-    box-shadow: 5px 5px 5px gray;
+    box-shadow: 5px 5px 5px black;
 }
 
 .text-container {
@@ -279,7 +279,6 @@ button:hover {
 
 .rated-movie {
     display: flex;
-    align-items: flex-start; /* Align items to the start */
     background: #fff;
     border: 1px solid #ddd;
     border-radius: 5px;
@@ -314,4 +313,52 @@ button:hover {
 .text-container p {
     margin: 0;
     text-align: center; /* Center text inside the container */
+}
+
+
+.rated-movie {
+    position: relative;
+    width: 100%; /* Adjust as needed */
+    height: 300px; /* Adjust as needed */
+    overflow: hidden; /* Prevent content from overflowing */
+    display: flex;
+    align-items: center; /* Center content vertically */
+    justify-content: center; /* Center content horizontally */
+}
+
+/* Pseudo-element for blurred background */
+.rated-movie::before {
+    content: "";
+    position: absolute;
+    top: -1;
+    left: -1;
+    width: 110%;
+    height: 110%;
+    background-image: inherit; /* Inherit the background image from parent */
+    background-size: cover; /* Cover the entire div */
+    background-position: center; /* Center the image */
+    background-repeat: no-repeat; /* Prevent repeating */
+    filter: blur(8px); /* Adjust blur amount as needed */
+    z-index: 0; /* Place below content */
+}
+
+/* Content container to stay above the background */
+.rated-movie .content {
+    position: relative;
+    z-index: 1; /* Ensure content is above the blurred background */
+    display: flex;
+    align-items: center; /* Center items vertically within the content */
+    text-align: left; /* Align text to the left */
+}
+
+/* Styling for the poster image */
+.rated-movie .poster {
+    width: 100px; /* Adjust as needed */
+    height: auto; /* Maintain aspect ratio */
+    margin-right: 20px; /* Space between poster and text */
+}
+
+/* Styling for the text content */
+.rated-movie .text {
+    max-width: calc(100% - 120px); /* Adjust based on poster width and margin */
 }
