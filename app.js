@@ -118,39 +118,36 @@ document.addEventListener('DOMContentLoaded', () => {
                 resetSite();
                 ratedMoviesSection.style.display = 'block';
                 const ratedMovies = [];
-            
+
                 // Retrieve all movies from localStorage
                 for (let i = 0; i < localStorage.length; i++) {
                     const key = localStorage.key(i);
-                    if (!key.includes('_rating')) { // Avoid fetching ratings only
-                        const movieData = localStorage.getItem(key);
-                        if (movieData) {
-                            const movie = JSON.parse(movieData);
-                            const rating = localStorage.getItem(`${key}_rating`);
-                            ratedMovies.push({ imdbID: key, rating: rating, ...movie });
-                        }
+                    const movieData = localStorage.getItem(key);
+                    if (movieData) {
+                        const movie = JSON.parse(movieData);
+                        ratedMovies.push({ imdbID: key, ...movie });
                     }
                 }
-            
+
                 // Fetch movie details from OMDb API for each rated movie
                 try {
                     const movieDetailsPromises = ratedMovies.map(async movie => {
                         const response = await fetch(`https://www.omdbapi.com/?i=${movie.imdbID}&apikey=${apiKey}`);
                         return response.json();
                     });
-            
+
                     const movieDetails = await Promise.all(movieDetailsPromises);
-            
+
                     // Merge movie details with ratings
                     const moviesWithDetails = ratedMovies.map(movie => {
                         const details = movieDetails.find(detail => detail.imdbID === movie.imdbID);
                         return {
                             ...movie,
                             ...details,
-                            rating: parseFloat(movie.rating) || 0 // Use the stored rating
+                            rating: parseFloat(movie.rating) || 0 // Convert rating to number
                         };
                     });
-            
+
                     // Sort movies based on the selected sort option
                     const sortOption = sortDropdown.value;
                     if (sortOption === 'rating') {
@@ -158,7 +155,8 @@ document.addEventListener('DOMContentLoaded', () => {
                     } else {
                         moviesWithDetails.sort((a, b) => a.Title.localeCompare(b.Title)); // Sort by name alphabetically
                     }
-            
+
+
                     // Display rated movies
                     const ratedMovieContainer = document.getElementById('rated-movie-container');
                     if (!ratedMovieContainer) {
@@ -173,12 +171,13 @@ document.addEventListener('DOMContentLoaded', () => {
                             <img src="${movie.Poster}" alt="${movie.Title}" class="movie-poster" data-id="${movie.imdbID}">
                             <div class="text-container">
                                 <strong>${movie.Title}</strong>
-                                <p>Rating: ${movie.rating}/5</p>
+                                <p>Rating: ${JSON.parse(localStorage.getItem(movie.imdbID)).rating}/5</p>
+
                             </div>
                         `;
                         ratedMovieContainer.appendChild(movieDiv);
                     });
-            
+
                     // Add click event listener to each movie poster
                     document.querySelectorAll('.movie-poster').forEach(poster => {
                         poster.addEventListener('click', function() {
@@ -186,7 +185,7 @@ document.addEventListener('DOMContentLoaded', () => {
                             showMovieDetails(imdbID);
                         });
                     });
-            
+
                     ratedMoviesSection.style.display = moviesWithDetails.length > 0 ? 'block' : 'none';
                 } catch (error) {
                     console.error('Error fetching movie details:', error);
@@ -197,16 +196,17 @@ document.addEventListener('DOMContentLoaded', () => {
                     ratedMoviesSection.style.display = 'none';
                 }
             });
-
         }
 
-        // Handle sort dropdown change
-            sortDropdown.addEventListener('change', (event) => {
-                const sortBy = sortDropdown.value;
-                console.log("changed dropdown");
+                    // Handle sort dropdown change
+            //const sortDropdown = document.getElementById('sort-movies');
+            if (sortDropdown) {
+                sortDropdown.addEventListener('change', function() {
+                    const sortBy = this.value;
+                    sortMovies(sortBy);
+                });
+            }
 
-                sortMovies(sortBy);
-            });
 
 
 
@@ -221,44 +221,33 @@ document.addEventListener('DOMContentLoaded', () => {
 
 function sortMovies(criteria) {
     const movieList = document.getElementById('rated-movie-container');
-    console.log("pass 1");
     if (!movieList) return;
-    console.log("pass 2");
 
     // Get current list items
     let movies = Array.from(movieList.querySelectorAll('.rated-movie'));
 
-    // Create a function to fetch titles asynchronously and then sort movies
-    async function fetchAndSort() {
-        for (let movie of movies) {
-            const imdbID = movie.querySelector('img').getAttribute('data-id');
-            const title = await fetchMovieTitle(imdbID);
-            movie.dataset.title = title || ''; // Store title in a dataset attribute for easy access later
+    // Sort based on the criteria
+    movies.sort((a, b) => {
+        const imdbID_A = a.querySelector('img').getAttribute('data-id');
+        const imdbID_B = b.querySelector('img').getAttribute('data-id');
+
+        if (criteria === 'name') {
+            const titleA = a.querySelector('.text-container strong').innerText;
+            const titleB = b.querySelector('.text-container strong').innerText;
+            return titleA.localeCompare(titleB);
+        } else if (criteria === 'rating') {
+            const ratingA = JSON.parse(localStorage.getItem(imdbID_A)).rating;
+            const ratingB = JSON.parse(localStorage.getItem(imdbID_B)).rating;
+            console.log(ratingA);
+            console.log(ratingB);
+            return ratingB - ratingA; // Sort descending by rating
         }
+        return 0;
+    });
 
-        // Sort based on the criteria
-        movies.sort((a, b) => {
-            const imdbID_A = a.querySelector('img').getAttribute('data-id');
-            const imdbID_B = b.querySelector('img').getAttribute('data-id');
-
-
-            if (criteria === 'name') {
-                const titleA = a.dataset.title;
-                const titleB = b.dataset.title;
-                return titleA.localeCompare(titleB);
-            } else if (criteria === 'rating') {
-                return localStorage.getItem(imdbID_B) - localStorage.getItem(imdbID_A); // Sort descending by rating
-            }
-            return 0;
-        });
-
-        // Update movie list with sorted items
-        movieList.innerHTML = '';
-        movies.forEach(movie => movieList.appendChild(movie));
-    }
-
-    // Call the asynchronous function
-    fetchAndSort();
+    // Update movie list with sorted items
+    movieList.innerHTML = '';
+    movies.forEach(movie => movieList.appendChild(movie));
 }
 
 
@@ -376,6 +365,7 @@ function fetchMovieTitle(imdbID) {
 function fetchMovieDetails(imdbID) {
     const apiKey = '97910366'; // Replace with your OMDb API key
     const url = `https://www.omdbapi.com/?i=${imdbID}&apikey=${apiKey}`;
+    const colorThief = new ColorThief(); // Initialize Color Thief
 
     fetch(url)
         .then(response => response.json())
@@ -383,12 +373,15 @@ function fetchMovieDetails(imdbID) {
             if (data.Response === 'False') {
                 document.getElementById('movie-details').innerHTML = `<p>${data.Error}</p>`;
                 document.getElementById('movie-details').style.display = 'none';
-                document.getElementById('movie-list').style.display = 'flex'; // Show the list again
-                resetMovieDetails(); // Reset details before showing new data
-                document.body.classList.remove('show-bg'); // Remove background blur
-            } else {
-                // Reset previous details and background
+                document.getElementById('movie-list').style.display = 'flex';
                 resetMovieDetails();
+                document.body.classList.remove('show-bg');
+            } else {
+                resetMovieDetails();
+
+                const movieDetailsElement = document.getElementById('movie-details');
+                movieDetailsElement.setAttribute('data-id', imdbID);
+                console.log('Setting imdbID:', imdbID);
 
                 // Populate movie details
                 document.getElementById('movie-title').innerText = data.Title;
@@ -406,16 +399,14 @@ function fetchMovieDetails(imdbID) {
                 document.getElementById('movie-boxoffice').innerText = `Grossed ${data.BoxOffice}`;
                 document.getElementById('movie-poster').src = data.Poster;
 
-                // Set the background to the movie poster
                 document.body.style.setProperty('--bg-image', `url(${data.Poster})`);
                 document.body.classList.add('show-bg');
 
-                // Extract dominant color from the poster
+                // Wait for the image to load before using Color Thief
                 const img = new Image();
                 img.crossOrigin = 'Anonymous';
                 img.src = data.Poster;
-
-                img.onload = function() {
+img.onload = function() {
                     const colorThief = new ColorThief();
                     const dominantColor = colorThief.getColor(img);
                     const colorHex = rgbToHex(dominantColor[0], dominantColor[1], dominantColor[2]);
@@ -456,89 +447,15 @@ function fetchMovieDetails(imdbID) {
                     document.getElementById('movie-rating').querySelector('label').style.color = getTextColor(colorHex);
                 };
 
-                // Hide the search results
+                document.getElementById('movie-details').style.display = 'block';
                 document.getElementById('movie-list').style.display = 'none';
-
-                // Show the movie details section
-                document.getElementById('movie-details').style.display = 'grid';
-
-                // Clear previous rating response
-                document.getElementById('rating-response').innerText = '';
-
-                // Retrieve the saved rating from localStorage
-                const savedRating = localStorage.getItem(imdbID);
-                if (savedRating) {
-                    const ratingInputs = document.querySelectorAll('input[name="rating"]');
-                    ratingInputs.forEach(input => {
-                        if (input.value === savedRating) {
-                            input.checked = true;
-                        } else {
-                            input.checked = false;
-                        }
-                    });
-                    document.getElementById('rating-response').innerText = `Your previous rating for this movie is ${savedRating}/5 stars.`;
-                } else {
-                    // No saved rating; turn off all stars
-                    const ratingInputs = document.querySelectorAll('input[name="rating"]');
-                    ratingInputs.forEach(input => {
-                        input.checked = false;
-                    });
-                    document.getElementById('rating-response').innerText = 'You have not rated this movie yet.';
-                }
-
-                // Add event listener for rating submission
-                const ratingButton = document.getElementById('submit-rating');
-                if (ratingButton) {
-                   ratingButton.addEventListener('click', async function() {
-                       const selectedRating = document.querySelector('input[name="rating"]:checked');
-                       const movieDetails = document.querySelector('#movie-details');
-                       const imdbID = movieDetails.getAttribute('data-id');
-
-                       if (imdbID) {
-                           if (selectedRating) {
-                               const rating = selectedRating.value;
-
-                               // Fetch movie details from OMDb API
-                               try {
-                                   const response = await fetch(`https://www.omdbapi.com/?i=${imdbID}&apikey=${apiKey}`);
-                                   const movieData = await response.json();
-
-                                   if (movieData.Response === 'True') {
-                                       const ratedMovie = {
-                                           title: movieData.Title,
-                                           poster: movieData.Poster,
-                                       };
-
-                                       // Save movie details and rating separately
-                                       localStorage.setItem(imdbID, JSON.stringify(ratedMovie));
-                                       localStorage.setItem(`${imdbID}_rating`, rating);
-                                       document.getElementById('rating-response').innerText = `Thank you for rating "${movieData.Title}" ${rating}/5!`;
-                                   } else {
-                                       document.getElementById('rating-response').innerText = 'Movie not found.';
-                                   }
-                               } catch (error) {
-                                   document.getElementById('rating-response').innerText = 'Error fetching movie details.';
-                               }
-                           } else {
-                               document.getElementById('rating-response').innerText = 'Please select a rating.';
-                           }
-                       } else {
-                           document.getElementById('rating-response').innerText = 'No movie selected.';
-                       }
-                   });
-
-                }
             }
         })
         .catch(error => {
-            console.error('Error:', error);
-            document.getElementById('movie-details').innerHTML = '<p>Failed to fetch movie details.</p>';
-            document.getElementById('movie-details').style.display = 'none';
-            document.getElementById('movie-list').style.display = 'flex'; // Show the list again
-            document.body.classList.remove('show-bg'); // Remove background blur
-            resetMovieDetails(); // Reset details before showing new data
+            console.error('Error fetching movie details:', error);
         });
 }
+
 
 // Utility function to convert RGB to Hex
 function rgbToHex(r, g, b) {
