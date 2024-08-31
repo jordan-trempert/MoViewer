@@ -362,10 +362,40 @@ function fetchMovieTitle(imdbID) {
 }
 
 
+// Function to reset the rating stars
+function resetRatingStars() {
+    const ratingButtons = document.querySelectorAll('input[name="rating"]');
+    ratingButtons.forEach(button => {
+        button.checked = false;
+    });
+}
+
+// Modify the function that shows movie details to reset stars
+function showMovieDetails(imdbID) {
+    window.scrollTo(0,0);
+    resetRatingStars(); // Reset stars before showing new movie
+    fetchMovieDetails(imdbID); // Fetch and display movie details
+    ratedMoviesSection.style.display = 'none';
+}
+
+
+function setRatingFromLocalStorage(imdbID) {
+    const rating = localStorage.getItem(imdbID);
+
+    if (rating) {
+        const parsedRating = JSON.parse(rating).rating; // Parse and get the rating
+        const radioInput = document.querySelector(`input[name="rating"][value="${parsedRating}"]`);
+
+        if (radioInput) {
+            radioInput.checked = true; // Set the appropriate radio button as checked
+        }
+    }
+}
+
+// Function to fetch and display movie details
 function fetchMovieDetails(imdbID) {
     const apiKey = '97910366'; // Replace with your OMDb API key
     const url = `https://www.omdbapi.com/?i=${imdbID}&apikey=${apiKey}`;
-    const colorThief = new ColorThief(); // Initialize Color Thief
 
     fetch(url)
         .then(response => response.json())
@@ -378,82 +408,84 @@ function fetchMovieDetails(imdbID) {
                 document.body.classList.remove('show-bg');
             } else {
                 resetMovieDetails();
+                resetRatingStars(); // Reset stars when fetching new details
+
 
                 const movieDetailsElement = document.getElementById('movie-details');
                 movieDetailsElement.setAttribute('data-id', imdbID);
-                console.log('Setting imdbID:', imdbID);
 
                 // Populate movie details
-                document.getElementById('movie-title').innerText = data.Title;
-                document.getElementById('movie-year').innerText = data.Year;
-                document.getElementById('movie-rated').innerText = data.Rated;
-                document.getElementById('movie-runtime').innerText = data.Runtime;
-                document.getElementById('movie-genre').innerText = data.Genre;
-                document.getElementById('movie-director').innerText = `Directed by: ${data.Director}`;
-                document.getElementById('movie-writer').innerText = `Written by: ${data.Writer}`;
-                document.getElementById('movie-actors').innerText = `Actors: ${data.Actors}`;
-                document.getElementById('movie-plot').innerText = data.Plot;
-                document.getElementById('movie-language').innerText = data.Language;
-                document.getElementById('movie-country').innerText = data.Country;
-                document.getElementById('movie-awards').innerText = `Awards: ${data.Awards}`;
-                document.getElementById('movie-boxoffice').innerText = `Grossed ${data.BoxOffice}`;
-                document.getElementById('movie-poster').src = data.Poster;
+                                document.getElementById('movie-title').innerText = data.Title;
+                                document.getElementById('movie-year').innerText = data.Year;
+                                document.getElementById('movie-rated').innerText = data.Rated;
+                                document.getElementById('movie-runtime').innerText = data.Runtime;
+                                document.getElementById('movie-genre').innerText = data.Genre;
+                                document.getElementById('movie-director').innerText = `Directed by: ${data.Director}`;
+                                document.getElementById('movie-writer').innerText = `Written by: ${data.Writer}`;
+                                document.getElementById('movie-actors').innerText = `Actors: ${data.Actors}`;
+                                document.getElementById('movie-plot').innerText = data.Plot;
+                                document.getElementById('movie-language').innerText = data.Language;
+                                document.getElementById('movie-country').innerText = data.Country;
+                                document.getElementById('movie-awards').innerText = `Awards: ${data.Awards}`;
+                                document.getElementById('movie-boxoffice').innerText = `Grossed ${data.BoxOffice}`;
+                                document.getElementById('movie-poster').src = data.Poster;
 
-                document.body.style.setProperty('--bg-image', `url(${data.Poster})`);
-                document.body.classList.add('show-bg');
+                                document.body.style.setProperty('--bg-image', `url(${data.Poster})`);
+                                document.body.classList.add('show-bg');
+                                setRatingFromLocalStorage(imdbID);
 
-                // Wait for the image to load before using Color Thief
-                const img = new Image();
-                img.crossOrigin = 'Anonymous';
-                img.src = data.Poster;
-img.onload = function() {
-                    const colorThief = new ColorThief();
-                    const dominantColor = colorThief.getColor(img);
-                    const colorHex = rgbToHex(dominantColor[0], dominantColor[1], dominantColor[2]);
+                                // Wait for the image to load before using Color Thief
+                                const img = new Image();
+                                img.crossOrigin = 'Anonymous';
+                                img.src = data.Poster;
+                img.onload = function() {
+                                    const colorThief = new ColorThief();
+                                    const dominantColor = colorThief.getColor(img);
+                                    const colorHex = rgbToHex(dominantColor[0], dominantColor[1], dominantColor[2]);
 
-                    // Apply the extracted colors
-                    document.querySelector('.container').style.backgroundColor = rgbToRgba("rgb("+dominantColor[0]+"," +dominantColor[1]+","+ dominantColor[2]+")",0.7);
-                    document.querySelectorAll('#movie-details .detail-box').forEach(box => {
-                        box.style.backgroundColor = colorHex;
-                    });
-                    document.querySelectorAll('#movie-details p').forEach(p => {
-                        p.style.color = getTextColor(colorHex);
-                    });
+                                    // Apply the extracted colors
+                                    document.querySelector('.container').style.backgroundColor = rgbToRgba("rgb("+dominantColor[0]+"," +dominantColor[1]+","+ dominantColor[2]+")",0.7);
+                                    document.querySelectorAll('#movie-details .detail-box').forEach(box => {
+                                        box.style.backgroundColor = colorHex;
+                                    });
+                                    document.querySelectorAll('#movie-details p').forEach(p => {
+                                        p.style.color = getTextColor(colorHex);
+                                    });
 
-                    const button = document.querySelector('button');
-                    const button2 = document.getElementById('view-rated-movies');
+                                    const button = document.querySelector('button');
+                                    const button2 = document.getElementById('view-rated-movies');
 
-                    button.style.backgroundColor = adjust(colorHex, -30); // Reset to the original color
-                    button2.style.backgroundColor = adjust(colorHex, -30); // Reset to the original color
+                                    button.style.backgroundColor = adjust(colorHex, -30); // Reset to the original color
+                                    button2.style.backgroundColor = adjust(colorHex, -30); // Reset to the original color
 
-                    button.addEventListener('mouseover', () => {
-                        button.style.backgroundColor = adjust(colorHex, -50); // Change to your desired color
-                    });
+                                    button.addEventListener('mouseover', () => {
+                                        button.style.backgroundColor = adjust(colorHex, -50); // Change to your desired color
+                                    });
 
-                    button2.addEventListener('mouseover', () => {
-                        button2.style.backgroundColor = adjust(colorHex, -50); // Change to your desired color
-                    });
+                                    button2.addEventListener('mouseover', () => {
+                                        button2.style.backgroundColor = adjust(colorHex, -50); // Change to your desired color
+                                    });
 
-                    button.addEventListener('mouseout', () => {
-                        button.style.backgroundColor = adjust(colorHex, -30); // Reset to the original color
-                    });
+                                    button.addEventListener('mouseout', () => {
+                                        button.style.backgroundColor = adjust(colorHex, -30); // Reset to the original color
+                                    });
 
-                    button2.addEventListener('mouseout', () => {
-                        button2.style.backgroundColor = adjust(colorHex, -30); // Reset to the original color
-                    });
-                    // Set color for h1 and specific text elements
-                    document.querySelector('h1').style.color = getTextColor(colorHex);
-                    document.getElementById('movie-title').style.color = getTextColor(colorHex);
-                    document.getElementById('movie-rating').querySelector('label').style.color = getTextColor(colorHex);
-                };
+                                    button2.addEventListener('mouseout', () => {
+                                        button2.style.backgroundColor = adjust(colorHex, -30); // Reset to the original color
+                                    });
+                                    // Set color for h1 and specific text elements
+                                    document.querySelector('h1').style.color = getTextColor(colorHex);
+                                    document.getElementById('movie-title').style.color = getTextColor(colorHex);
+                                    document.getElementById('movie-rating').querySelector('label').style.color = getTextColor(colorHex);
+                                };
 
-                document.getElementById('movie-details').style.display = 'block';
-                document.getElementById('movie-list').style.display = 'none';
-            }
-        })
-        .catch(error => {
-            console.error('Error fetching movie details:', error);
-        });
+                                document.getElementById('movie-details').style.display = 'block';
+                                document.getElementById('movie-list').style.display = 'none';
+                            }
+                        })
+                        .catch(error => {
+                            console.error('Error fetching movie details:', error);
+                        });
 }
 
 
