@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MoViewer Privacy Policy</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f9;
+            color: #333;
+            margin: 0;
+            padding: 0;
+        }
+        .container {
+            max-width: 800px;
+            margin: 50px auto;
+            background-color: #fff;
+            padding: 20px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+        h1 {
+            color: #2c3e50;
+            text-align: center;
+        }
+        h2 {
+            color: #34495e;
+        }
+        p {
+            line-height: 1.6;
+        }
+        footer {
+            text-align: center;
+            margin-top: 40px;
+            font-size: 0.9em;
+            color: #7f8c8d;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Privacy Policy for MoViewer</h1>
+        <p><strong>Last updated:</strong> 9/5/2024</p>
+
+        <h2>Introduction</h2>
+        <p>Welcome to <strong>MoViewer</strong>, developed by <strong>Stardom Studios</strong>. Your privacy is important to us, and we are committed to protecting any personal information you may provide while using our app. This Privacy Policy explains how <strong>MoViewer</strong> handles your data.</p>
+
+        <h2>Data Collection</h2>
+        <p>We do <strong>not</strong> collect any personal information or data from users. <strong>MoViewer</strong> is designed to function entirely on your device without transmitting any data to our servers or third-party services.</p>
+
+        <h2>Data Storage</h2>
+        <p>All data related to your use of <strong>MoViewer</strong>, including your preferences, settings, and any content you manage within the app, is stored <strong>locally on your device</strong>. We do not have access to this data, nor is it shared or uploaded anywhere outside of your device.</p>
+
+        <h2>Security</h2>
+        <p>Although we do not collect or store your data, it is your responsibility to ensure that your device and the information stored within <strong>MoViewer</strong> are kept secure. We recommend using appropriate device security measures such as passcodes or encryption to protect your information.</p>
+
+        <h2>Changes to This Privacy Policy</h2>
+        <p>From time to time, we may update this Privacy Policy to reflect changes in the app or legal requirements. If we make any changes, the updated Privacy Policy will be available on this page, and the "Last updated" date will be revised accordingly.</p>
+
+        <h2>Contact Us</h2>
+        <p>If you have any questions about this Privacy Policy, feel free to contact us at:</p>
+        <p><strong>Stardom Studios</strong><br>Email: stardomgames1@gmail.com</p>
+
+        <footer>
+            &copy; 2024 Stardom Studios. All rights reserved.
+        </footer>
+    </div>
+</body>
+</html>
