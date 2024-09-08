@@ -2,7 +2,6 @@
 import { initializeApp } from 'https://www.gstatic.com/firebasejs/9.22.2/firebase-app.js';
 import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, onAuthStateChanged, signOut, updateProfile, sendEmailVerification  } from 'https://www.gstatic.com/firebasejs/9.22.2/firebase-auth.js';
 import {getFirestore, collection, addDoc, getDocs, query, where, orderBy, updateDoc, doc} from 'https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore.js';
-import ColorThief from './node_modules/colorthief/dist/color-thief.mjs'
 
 
 // Firebase config and initialization
