@@ -7,9 +7,8 @@ body {
     justify-content: center;
     align-items: center;
     min-height: 100vh;
-    position: relative; /* Ensure positioning context for the pseudo-element */
+    position: relative;
     background-image: url("background.jpg");
-
 }
 
 body::before {
@@ -24,7 +23,7 @@ body::before {
     background-position: center;
     background-repeat: no-repeat;
     filter: blur(10px);
-    z-index: 0; /* Behind the content */
+    z-index: 0;
     opacity: 0;
     transition: opacity 0.5s ease-in-out;
 }
@@ -36,20 +35,15 @@ body.show-bg::before {
 .container {
     max-width: 900px;
     width: 100%;
-    background: rgba(255,255,255, 0.7);
+    background: rgba(255, 255, 255, 0.7);
     padding: 20px;
     border-radius: 8px;
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
     text-align: center;
-    position: relative; /* Keep it above the pseudo-element */
-    z-index: 1; /* Ensure container is above the pseudo-element */
-    margin-top: 40px; /* Add this line to ensure space from the top */
-    margin-bottom: 40px; /* Add this line to ensure space from the top */
-
-}
-
-
-
+    position: relative;
+    z-index: 1;
+    margin-top: 40px;
+    margin-bottom: 40px;
 }
 
 h1 {
@@ -61,12 +55,11 @@ form {
     margin-bottom: 20px;
 }
 
-
 input[type="text"] {
     padding: 10px;
     width: 80%;
     max-width: 500px;
-    margin-right: 20px; /* Adds space between the search input and the buttons */
+    margin-right: 20px;
 }
 
 button {
@@ -82,6 +75,7 @@ button {
 button:hover {
     background: #0056b3;
 }
+
 #movie-list {
     list-style-type: none;
     padding: 0;
@@ -98,17 +92,15 @@ button:hover {
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
     cursor: pointer;
     transition: transform 0.2s;
-
 }
 
-#movie-list img{
+#movie-list img {
     border-radius: 20px;
 }
 
 #movie-list img:hover {
     transform: scale(1.05);
     box-shadow: 5px 5px 5px gray;
-
 }
 
 #movie-details {
@@ -159,7 +151,6 @@ button:hover {
     font-weight: bold;
 }
 
-
 #movie-details img {
     max-width: 300px;
     border-radius: 4px;
@@ -167,14 +158,12 @@ button:hover {
     margin-left: auto;
     margin-right: auto;
     opacity: 100%;
-
 }
-
 
 .rating {
     display: flex;
     font-size: 2rem;
-    direction: rtl; /* Ensure stars are ordered from left to right */
+    direction: rtl;
 }
 
 .rating input {
@@ -188,7 +177,7 @@ button:hover {
 }
 
 .rating .star:before {
-    content: "\2605"; /* Star character */
+    content: "\2605";
     display: inline-block;
 }
 
@@ -198,7 +187,7 @@ button:hover {
 }
 
 .rating .star.half:before {
-    content: "\2605"; /* Full star */
+    content: "\2605";
     position: absolute;
     width: 50%;
     overflow: hidden;
@@ -215,7 +204,7 @@ button:hover {
 }
 
 .rating .star.half:hover:before {
-    content: "\2605"; /* Full star */
+    content: "\2605";
     position: absolute;
     width: 50%;
     overflow: hidden;
@@ -223,6 +212,328 @@ button:hover {
 }
 
 /* Rated Movies */
+#rated-movie-container {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    align-items: center;
+}
+
+.rated-movie {
+    display: flex;
+    background: #fff;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    padding: 10px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    width: 100%;
+    max-width: 900px;
+    box-sizing: border-box;
+}
+
+.movie-poster {
+    width: 100px;
+    height: auto;
+    border-radius: 4px;
+    margin-right: 20px;
+    margin-left: 30%;
+}
+
+.text-container {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    margin-top: 5%;
+}
+
+.text-container strong {
+    font-size: 1.2em;
+    margin-bottom: 5px;
+    text-align: center;
+}
+
+.text-container p {
+    margin: 0;
+    text-align: center;
+}
+
+.rated-movie {
+    position: relative;
+    height: 300px;
+    overflow: hidden;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-right: 40px;
+}
+
+.rated-movie::before {
+    content: "";
+    position: absolute;
+    top: -1;
+    left: -1;
+    width: 110%;
+    height: 110%;
+    background: rgba(0, 0, 0, 1);
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+    filter: blur(8px);
+    z-index: 0;
+}
+
+.rated-movie .content {
+    position: relative;
+    z-index: 1;
+    display: flex;
+    align-items: center;
+    text-align: left;
+}
+
+.rated-movie .poster {
+    width: 100px;
+    height: auto;
+    margin-right: 20px;
+}
+
+.rated-movie .text {
+    max-width: calc(100% - 120px);
+}
+
+.text-container {
+    position: relative;
+    display: inline-block;
+    color: #ffffff;
+}
+
+.text-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5);
+    z-index: -1;
+}
+
+/* Style for positioning the buttons in the top-right corner */
+.auth-buttons {
+    position: fixed;
+    top: 10px;
+    right: 10px;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+}
+
+/* Adjust logout button style */
+#logout {
+    padding: 5px 10px;
+    font-size: 12px;
+    background-color: #007bff;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+    width: auto;
+}
+
+#logout:hover {
+    background-color: #0056b3;
+}
+
+.auth-buttons span {
+    font-weight: bold;
+    font-size: 14px;
+    color: black;
+    margin-right: 5px;
+    padding: 0.5rem;
+    border-radius: 2px;
+    background-color: rgba(255,255,255,0.7);
+}
+
+.auth-buttons input[type="email"],
+.auth-buttons input[type="password"],
+.auth-buttons input[type="text"] {
+    width: 90%;
+    max-width: 280px;
+    margin: 0 auto 10px;
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    font-size: 16px;
+    box-sizing: border-box;
+}
+
+.auth-buttons input:focus {
+    border-color: #007BFF;
+    outline: none;
+    box-shadow: 0 0 5px rgba(0, 123, 255, 0.5);
+}
+
+/* Media query for smaller screens (max-width: 768px) */
+@media (max-width: 768px) {
+    .container {
+        padding: 10px;
+        margin-top: 20px;
+    }
+
+    #movie-list {
+        flex-direction: column;
+        gap: 15px;
+    }
+
+    #movie-list li {
+        width: 90%;
+        margin: 0 auto;
+    }
+
+    .detail-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .rated-movie {
+        flex-direction: column;
+        height: auto;
+    }
+
+    .movie-poster {
+        width: 80px;
+        margin: 0 auto 10px;
+    }
+
+    .auth-buttons {
+        flex-direction: column;
+        position: static;
+        gap: 5px;
+        padding: 0;
+        margin-top: 20px;
+    }
+
+    .auth-buttons button {
+        width: 100%;
+        font-size: 12px;
+    }
+}
+
+/* Media query for very small screens (max-width: 480px) */
+@media (max-width: 480px) {
+    body {
+        padding: 0 5px;
+    }
+
+    h1 {
+        font-size: 1.5rem;
+    }
+
+    input[type="text"] {
+        width: 100%;
+        margin-right: 0;
+        margin-bottom: 10px;
+    }
+
+    button {
+        width: 100%;
+        padding: 8px 10px;
+        margin-top: 20px;
+    }
+
+    .text-container {
+        text-align: center;
+    }
+
+
+}
+
+
+/* Main styles remain the same */
+
+/* Style for positioning the buttons in the top-right corner */
+.auth-buttons {
+    position: fixed; /* Keeps the buttons fixed at the top right */
+    top: 10px; /* Positions near the top */
+    right: 10px; /* Positions near the right edge */
+    display: flex;
+     /* Align items vertically */
+    gap: 5px; /* Space between username and logout button */
+    z-index: 10; /* Ensures it stays on top of other content */
+    flex-direction: row;
+    align-content: stretch;
+    justify-content: space-evenly;
+    align-items: baseline;
+}
+/* Adjust logout button style */
+#logout {
+    padding: 5px 10px; /* Smaller padding */
+    font-size: 12px;
+    background-color: #007bff;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+    width: auto; /* Avoids taking too much space */
+    line-height: normal; /* Ensure consistent line height */
+    display: flex;
+    align-items: center;
+}
+
+#logout:hover {
+    background-color: #0056b3;
+}
+
+.auth-buttons span {
+    font-weight: bold;
+    font-size: 14px;
+    color: black;
+    margin-right: 5px; /* Space between text and button */
+    padding: 5px 10px; /* Ensure consistent padding */
+    border-radius: 2px;
+    background-color: rgba(255, 255, 255, 0.7);
+    line-height: 1; /* Ensures vertical alignment with the button */
+    display: flex;
+    align-items: center;
+}
+
+/* Media query for smaller screens (max-width: 768px) */
+@media (max-width: 768px) {
+    .auth-buttons {
+        top: 5px; /* Adjusts positioning slightly for smaller screens */
+        right: 5px;
+    }
+
+    .auth-buttons button {
+        font-size: 12px; /* Slightly smaller text size for better fit */
+    }
+}
+
+/* General styling for the text input */
+input[type="text"] {
+    padding: 10px;
+    width: 80%;
+    max-width: 500px;
+    margin-right: 20px;
+    box-sizing: border-box; /* Ensures padding and borders are included in width calculation */
+}
+
+/* Media query for smaller screens (max-width: 768px) */
+@media (max-width: 768px) {
+    input[type="text"] {
+        width: 90%; /* Adjust width to fit better on smaller screens */
+        max-width: 300px; /* Further restrict max width for better control */
+        margin: 0 auto 10px; /* Center the input and add spacing below */
+    }
+}
+
+/* Media query for very small screens (max-width: 480px) */
+@media (max-width: 480px) {
+    input[type="text"] {
+        width: 100%; /* Full width on very small screens */
+        max-width: 250px; /* Further restrict max width for small screens */
+        margin: 0 auto 10px; /* Ensure the input stays centered and properly spaced */
+    }
+}
+
+
 #rated-movie-container {
     display: flex;
     flex-direction: column;
@@ -239,36 +550,6 @@ button:hover {
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
-.movie-poster {
-    width: 100px;
-    height: auto;
-    border-radius: 4px;
-    margin-right: 20px; /* Space between image and text */
-}
-
-.movie-poster:hover {
-    transform: scale(1.05);
-    box-shadow: 5px 5px 5px black;
-}
-
-.text-container {
-    display: flex;
-    flex-direction: column;
-}
-
-.text-container strong {
-    font-size: 1.2em;
-    margin-bottom: 5px;
-}
-
-.text-container p {
-    margin: 0;
-}
-
-
-.wrapper{
-   border: 2px green;
-}
 
 #rated-movie-container {
     display: flex;
@@ -288,33 +569,6 @@ button:hover {
     max-width: 900px; /* Set a max width to keep boxes from becoming too wide */
     box-sizing: border-box; /* Include padding and border in the element's total width and height */
 }
-
-.movie-poster {
-    width: 100px;
-    height: auto;
-    border-radius: 4px;
-    margin-right: 20px; /* Space between image and text */
-    margin-left: 30%; /* Space between image and text */
-}
-
-.text-container {
-    display: flex;
-    flex-direction: column;
-    justify-content: center; /* Center the text vertically in the container */
-    margin-top: 5%;
-}
-
-.text-container strong {
-    font-size: 1.2em;
-    margin-bottom: 5px;
-    text-align: center; /* Center text inside the container */
-}
-
-.text-container p {
-    margin: 0;
-    text-align: center; /* Center text inside the container */
-}
-
 
 .rated-movie {
     position: relative;
@@ -364,20 +618,3 @@ button:hover {
 .rated-movie .text {
     max-width: calc(100% - 120px); /* Adjust based on poster width and margin */
 }
-
-.text-container {
-    position: relative;
-    display: inline-block;
-    color: #ffffff; /* White text color */
-}
-
-.text-overlay {
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background-color: rgba(0, 0, 0, 0.5); /* Black background with 50% opacity */
-    z-index: -1; /* Place the overlay behind the text */
-}
-

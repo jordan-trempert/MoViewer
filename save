@@ -1,8 +1,9 @@
-#movie-details img {
-    max-width: 300px;
-    border-radius: 4px;
-    display: block;
-    margin-left: auto;
-    margin-right: auto;
-
-}
+const firebaseConfig = {
+    apiKey: "AIzaSyAVDIP1W89kLM7xgJo8yAvTufP0fcbg9fk",
+    authDomain: "moviewer-84e0d.firebaseapp.com",
+    projectId: "moviewer-84e0d",
+    storageBucket: "moviewer-84e0d.appspot.com",
+    messagingSenderId: "752291823648",
+    appId: "1:752291823648:web:f396025ae5dfeca950fc45",
+    measurementId: "G-W6PLPV0N1L"
+};

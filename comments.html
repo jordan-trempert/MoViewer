@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Movie Comments</title>
+    <link rel="stylesheet" href="comments.css"> <!-- Link to your CSS file -->
+    <script type="module" src="app.js"></script>
+
+</head>
+<body id="body">
+<wrapper id="color">
+<header>
+    <h1 id="header">Movie Comments</h1>
+    <button id="back-button" action="action"
+            onclick="window.history.go(-1); return false;">Back</button>
+</header>
+<main>
+    <form id="comment-form">
+        <textarea id="comment-input" placeholder="Add your comment here..."></textarea>
+        <button type="submit">Submit Comment</button>
+        <br />
+    </form>
+    <div id="comments-container"></div>
+
+</main>
+</wrapper>
+
+</body>
+</html>

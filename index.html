@@ -1,42 +1,71 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" xmlns="http://www.w3.org/1999/html">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
     <title>MoViewer</title>
     <link rel="icon" href="favicon.ico" type="image/x-icon">
     <link rel="icon" href="favicon.png" type="image/png">
-
-    <link rel="stylesheet" href="styles.css">
-    <script src="https://cdn.jsdelivr.net/npm/colorthief@2.3.2/dist/color-thief.umd.min.js"></script>
+    <link rel="stylesheet" type="text/css" href="styles.css">
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/colorthief@2.3.2/dist/color-thief.min.js"></script>
 </head>
 <body>
+<!-- Updated wrapper div for the login/signup/logout buttons -->
+<div class="auth-buttons">
+    <p>
+        <span id="user-username" style="display: none;" class="username"></span>
+    </p>
+
+
+
+    <!-- Login Form for Email and Password -->
+
+
+    <!-- Logout Button -->
+    <button type="button" id="logout" style="display: none;">Logout</button>
+</div>
+
 <div class="container">
     <h1>MoViewer</h1>
-    <form id="search-form">
+    <!-- Movie search form and details remain the same -->
+    <form id="search-form" style="display: none;">
         <input type="text" id="search-input" placeholder="Enter movie title" required>
-        <br></br>
+        <br><br>
         <button type="button" id="view-rated-movies">View Rated Movies</button>
         <button type="submit">Search</button>
     </form>
+    <!-- Sign-Up Form with Username, Email, and Password -->
+    <div id="auth-form">
+        <input type="text" id="username-input" placeholder="Username" required><br /><br />
+        <input type="email" id="email-input" placeholder="Email" required>
+        <input type="password" id="password-input" placeholder="Password" required>
+        <button type="button" id="email-signup">Sign Up</button>
+        <button type="button" id="email-login-toggle">Already have an account? Log in</button>
+    </div>
+    <div id="login-form" style="display: none;">
+        <input type="email" id="login-email-input" placeholder="Email" required>
+        <input type="password" id="login-password-input" placeholder="Password" required>
+        <button type="button" id="email-login">Login</button>
+        <button type="button" id="signup-toggle">Don't have an account? Sign up</button>
+    </div>
     <ul id="movie-list"></ul>
-    <div id="movie-details">
+
+    <div id="movie-details" style="display: none;">
         <h2 id="movie-title"></h2>
         <img id="movie-poster" src="" alt="Movie Poster">
-        <div id="wrapper">
-            <div class="detail-box">
-                <p id="movie-year"></p>
-            </div>
-            <div class="detail-box">
-                <p id="movie-rated"></p>
-            </div>
-            <div class="detail-box">
-                <p id="movie-runtime"></p>
-            </div>
-            <div class="detail-box">
-                <p id="movie-genre"></p>
-            </div>
+        <div class="detail-box">
+            <p id="movie-year"></p>
+        </div>
+        <div class="detail-box">
+            <p id="movie-rated"></p>
+        </div>
+        <div class="detail-box">
+            <p id="movie-runtime"></p>
+        </div>
+        <div class="detail-box">
+            <p id="movie-genre"></p>
         </div>
         <div class="detail-box">
             <p id="movie-director"></p>
@@ -62,35 +91,43 @@
         <div class="detail-box">
             <p id="movie-boxoffice"></p>
         </div>
-
+        <div class="detail-box">
+            <p id="average-rating"></p>
+        </div>
         <div class="detail-box" id="movie-rating">
             <label>Rate this movie:</label>
             <div class="rating">
-                <input type="radio" name="rating" id="star5" value="5" />
+                <input type="radio" name="rating" id="star5" value="5">
                 <label for="star5" class="star"></label>
-                <input type="radio" name="rating" id="star4half" value="4.5" />
+                <input type="radio" name="rating" id="star4half" value="4.5">
                 <label for="star4half" class="star half"></label>
-                <input type="radio" name="rating" id="star4" value="4" />
+                <input type="radio" name="rating" id="star4" value="4">
                 <label for="star4" class="star"></label>
-                <input type="radio" name="rating" id="star3half" value="3.5" />
+                <input type="radio" name="rating" id="star3half" value="3.5">
                 <label for="star3half" class="star half"></label>
-                <input type="radio" name="rating" id="star3" value="3" />
+                <input type="radio" name="rating" id="star3" value="3">
                 <label for="star3" class="star"></label>
-                <input type="radio" name="rating" id="star2half" value="2.5" />
+                <input type="radio" name="rating" id="star2half" value="2.5">
                 <label for="star2half" class="star half"></label>
-                <input type="radio" name="rating" id="star2" value="2" />
+                <input type="radio" name="rating" id="star2" value="2">
                 <label for="star2" class="star"></label>
-                <input type="radio" name="rating" id="star1half" value="1.5" />
+                <input type="radio" name="rating" id="star1half" value="1.5">
                 <label for="star1half" class="star half"></label>
-                <input type="radio" name="rating" id="star1" value="1" />
+                <input type="radio" name="rating" id="star1" value="1">
                 <label for="star1" class="star"></label>
             </div>
             <p id="rating-response"></p>
             <button id="submit-rating">Submit Rating</button>
         </div>
+
+        <div class="detail-box">
+            <button id="comments-button">View/Add Comments</button>
+        </div>
+
     </div>
 
-    <!-- Rated Movies Section -->
+
+    <!-- Rated Movies Section remains the same -->
     <section id="rated-movies" style="display: none;">
         <label for="sort-movies">Sort by:</label>
         <select id="sort-movies">
@@ -100,9 +137,9 @@
         <h2>Your Rated Movies</h2>
         <ul id="rated-movie-container" class="rated-movie-list"></ul>
     </section>
-
 </div>
 
-<script src="app.js"></script>
+<script type="module" src="app.js"></script>
+
 </body>
 </html>

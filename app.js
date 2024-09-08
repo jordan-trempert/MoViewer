@@ -1,12 +1,306 @@
-document.getElementById('search-form').addEventListener('submit', function(e) {
-    e.preventDefault();
-    const query = document.getElementById('search-input').value.trim();
-    if (query) {
-        searchMovies(query);
+// Import the functions you need from the SDKs you need
+import { initializeApp } from 'https://www.gstatic.com/firebasejs/9.22.2/firebase-app.js';
+import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, onAuthStateChanged, signOut, updateProfile, sendEmailVerification  } from 'https://www.gstatic.com/firebasejs/9.22.2/firebase-auth.js';
+import {getFirestore, collection, addDoc, getDocs, query, where, orderBy, updateDoc, doc} from 'https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore.js';
+import ColorThief from './node_modules/colorthief/dist/color-thief.mjs'
+
+
+// Firebase config and initialization
+const firebaseConfig = {
+    apiKey: "AIzaSyAVDIP1W89kLM7xgJo8yAvTufP0fcbg9fk",
+    authDomain: "moviewer-84e0d.firebaseapp.com",
+    projectId: "moviewer-84e0d",
+    storageBucket: "moviewer-84e0d.appspot.com",
+    messagingSenderId: "752291823648",
+    appId: "1:752291823648:web:f396025ae5dfeca950fc45",
+    measurementId: "G-W6PLPV0N1L"
+};
+
+const app = initializeApp(firebaseConfig);
+const auth = getAuth(app);
+const db = getFirestore(app);
+
+// Helper function to toggle visibility
+function toggleVisibility(user) {
+    const usernameElement = document.getElementById('user-username');
+    const logoutButton = document.getElementById('logout');
+    const authForm = document.getElementById('auth-form');
+    const loginForm = document.getElementById('login-form');
+    const searchForm = document.getElementById('search-form');
+
+    if (user && usernameElement != null) {
+        // If user is logged in
+        usernameElement.textContent = user.displayName || user.email;
+        usernameElement.style.display = 'block';
+        logoutButton.style.display = 'block';
+        authForm.style.display = 'none';
+        loginForm.style.display = 'none';
+        searchForm.style.display = 'block';
     } else {
-        alert('Please enter a movie title.');
+        // If user is logged out
+        if(usernameElement){
+            usernameElement.style.display = 'none';
+            logoutButton.style.display = 'none';
+            authForm.style.display = 'block';
+            loginForm.style.display = 'none';
+            searchForm.style.display = 'none';
+        }
+
+    }
+}
+
+// Toggle between login and sign-up forms
+if(document.getElementById('email-login-toggle')){
+
+    document.getElementById('email-login-toggle').addEventListener('click', () => {
+        document.getElementById('auth-form').style.display = 'none';
+        document.getElementById('login-form').style.display = 'block';
+    });
+
+    document.getElementById('signup-toggle').addEventListener('click', () => {
+        document.getElementById('login-form').style.display = 'none';
+        document.getElementById('auth-form').style.display = 'block';
+    });
+
+    // Sign-up event listener
+    document.getElementById('email-signup').addEventListener('click', () => {
+        const email = document.getElementById('email-input').value;
+        const password = document.getElementById('password-input').value;
+        const username = document.getElementById('username-input').value;
+
+        createUserWithEmailAndPassword(auth, email, password)
+            .then((userCredential) => {
+                const user = userCredential.user;
+
+                // Update profile to include the custom username
+                updateProfile(user, {
+                    displayName: username
+                }).then(() => {
+                    console.log('Username set:', user.displayName);
+                    toggleVisibility(user);
+                }).catch((error) => {
+                    console.error('Error setting username:', error);
+                });
+            })
+            .catch((error) => {
+                console.error('Sign-up failed:', error);
+            });
+    });
+
+    // Login event listener
+    document.getElementById('email-login').addEventListener('click', () => {
+        const email = document.getElementById('login-email-input').value;
+        const password = document.getElementById('login-password-input').value;
+
+        signInWithEmailAndPassword(auth, email, password)
+            .then((userCredential) => {
+                const user = userCredential.user;
+                toggleVisibility(user);
+            })
+            .catch((error) => {
+                console.error('Login failed:', error);
+            });
+    });
+
+    // Logout event listener
+    document.getElementById('logout').addEventListener('click', () => {
+        signOut(auth).then(() => {
+            console.log('User logged out');
+            toggleVisibility(null);
+        }).catch((error) => {
+            console.error('Logout failed:', error);
+        });
+    });
+}
+// Check if the user is logged in on page load
+onAuthStateChanged(auth, (user) => {
+    toggleVisibility(user);
+});
+
+
+document.addEventListener('DOMContentLoaded', async () => {
+    const params = new URLSearchParams(window.location.search);
+    const imdbID = params.get('imdbID');
+    const commentsContainer = document.getElementById('comments-container');
+    const body = document.getElementById('body');
+    const header = document.getElementById('header');
+    const commentForm = document.getElementById('comment-form');
+    const commentInput = document.getElementById('comment-input');
+    const containerBG = document.getElementById('color');
+    const colorThief = new ColorThief();
+
+    if (imdbID && commentForm) {
+        // Fetch movie details from OMDb API
+        const apiKey = '97910366'; // Replace with your OMDb API key
+        const url = `https://www.omdbapi.com/?i=${imdbID}&apikey=${apiKey}`;
+        let movieTitle = '';
+        let moviePoster = '';
+
+        try {
+            const response = await fetch(url);
+            const data = await response.json();
+
+            if (data.Response === 'True') {
+                movieTitle = data.Title;
+                moviePoster = data.Poster;
+                header.innerText = `${movieTitle} Comments`; // Update header text
+
+                const img = new Image();
+                img.crossOrigin = 'Anonymous'; // Ensure CORS is handled
+                img.crossOrigin = 'Anonymous'; // Ensure CORS is handled
+                img.src = moviePoster;
+
+                img.onload = () => {
+                    const [r, g, b] = colorThief.getColor(img);
+                    const rgbaColor = `rgba(${r}, ${g}, ${b}, 0.7)`; // Convert RGB to RGBA with alpha 0.7
+                    containerBG.style.backgroundColor = rgbaColor;
+
+                    // Calculate the opposite color for the text
+                    const oppositeColor = `rgb(${255 - r}, ${255 - g}, ${255 - b})`;
+                    header.style.color = `rgb(255,255,255)`; // Set the header color to the opposite
+
+                    // Add a black outline to the text with 2px thickness
+                    header.style.textShadow = `
+                        -1px -1px 0px black,
+                         1px -1px 0px black,
+                        -1px  1px 0px black,
+                         1px  1px 0px black
+                    `;
+
+                    // Optionally, you can get the color palette as well
+                    const palette = colorThief.getPalette(img, 5);
+                    console.log('Palette:', palette);
+                };
+
+                // Set the blurred background
+                body.style.position = 'relative';
+                body.style.background = `url(${moviePoster}) no-repeat center center fixed`;
+                body.style.backgroundSize = 'cover';
+
+                // Create and style the blurred background element
+                const blurredBackground = document.createElement('div');
+                blurredBackground.className = 'blurred-background';
+                blurredBackground.style.backgroundImage = `url(${moviePoster})`;
+                body.appendChild(blurredBackground);
+            } else {
+                console.error('Error fetching movie details:', data.Error);
+            }
+        } catch (error) {
+            console.error('Error fetching movie details:', error);
+        }
+
+        // Load existing comments
+        const commentsQuery = query(
+            collection(db, 'comments'),
+            where('imdbID', '==', imdbID),
+            orderBy('timestamp', 'desc')
+        );
+
+        try {
+            const querySnapshot = await getDocs(commentsQuery);
+            for (const doc of querySnapshot.docs) {
+                const data = doc.data();
+                const commentElement = document.createElement('div');
+                commentElement.className = 'comment';
+                commentElement.innerHTML = `<p><strong>${data.displayName || 'Unknown User'}</strong>: ${data.comment} <br /><em>${new Date(data.timestamp.toDate()).toLocaleString()}</em></p>`;
+                commentsContainer.appendChild(commentElement);
+            }
+        } catch (error) {
+            console.error('Error fetching comments:', error);
+        }
+
+        // Add new comment
+        commentForm.addEventListener('submit', async (event) => {
+            event.preventDefault();
+            const user = auth.currentUser;
+
+            if (user && commentInput.value.trim()) {
+                try {
+                    await addDoc(collection(db, 'comments'), {
+                        imdbID: imdbID,
+                        userId: user.uid,
+                        displayName: user.displayName || 'Anonymous', // Store displayName
+                        comment: commentInput.value,
+                        timestamp: new Date()
+                    });
+                    // Clear input and reload comments
+                    commentInput.value = '';
+                    commentsContainer.innerHTML = '';
+                    // Reload comments with updated query
+                    const updatedCommentsQuery = query(
+                        collection(db, 'comments'),
+                        where('imdbID', '==', imdbID),
+                        orderBy('timestamp', 'desc')
+                    );
+                    const updatedQuerySnapshot = await getDocs(updatedCommentsQuery);
+                    for (const doc of updatedQuerySnapshot.docs) {
+                        const data = doc.data();
+                        const commentElement = document.createElement('div');
+                        commentElement.className = 'comment';
+                        commentElement.innerHTML = `<p><strong>${data.displayName || 'Unknown User'}</strong>: ${data.comment} <br /><em>${new Date(data.timestamp.toDate()).toLocaleString()}</em></p>`;
+                        commentsContainer.appendChild(commentElement);
+                    }
+                } catch (error) {
+                    console.error('Error adding comment:', error);
+                }
+            } else {
+                alert('You must be logged in to comment and the comment cannot be empty.');
+            }
+        });
+    } else {
+        console.error('No imdbID provided.');
     }
 });
+
+
+
+
+// Check if the user is logged in on page load
+onAuthStateChanged(auth, (user) => {
+    if(document.getElementById('movie-list')){
+        if (user) {
+            console.log('User is logged in:', user.email);
+            document.getElementById('movie-list').style.display = 'block'; // Show content if user is logged in
+            // Hide login button and show logout button and username
+            //document.getElementById('google-login').style.display = 'none';
+            document.getElementById('logout').style.display = 'block';
+            document.getElementById('user-username').textContent = user.displayName || user.email;
+            document.getElementById('user-username').style.display = 'block';
+        } else {
+            console.log('No user logged in');
+            document.getElementById('movie-list').style.display = 'none'; // Hide content if no user is logged in
+            // Show login button and hide logout button and username
+            //document.getElementById('google-login').style.display = 'block';
+            document.getElementById('logout').style.display = 'none';
+            document.getElementById('user-username').style.display = 'none';
+        }
+    }
+});
+
+
+if(document.getElementById('search-form')){
+    document.getElementById('search-form').addEventListener('submit', function(e) {
+        e.preventDefault();
+        const query = document.getElementById('search-input').value.trim();
+        if (query) {
+            searchMovies(query);
+        } else {
+            alert('Please enter a movie title.');
+        }
+    });
+
+
+
+    document.getElementById('search-form').addEventListener('submit', function(e) {
+        e.preventDefault();
+        const query = document.getElementById('search-input').value.trim();
+        if (query) {
+            searchMovies(query);
+        } else {
+            alert('Please enter a movie title.');
+        }
+    });
+}
 
 
 
@@ -17,11 +311,16 @@ document.addEventListener('DOMContentLoaded', () => {
     const searchInput = document.getElementById('search-input');
     const viewRatedMoviesButton = document.getElementById('view-rated-movies');
     const submitRatingButton = document.getElementById('submit-rating');
+    const commentsButton = document.getElementById('comments-button');
     const movieList = document.getElementById('movie-list');
     const movieDetails = document.getElementById('movie-details');
     const ratedMoviesSection = document.getElementById('rated-movies');
     const container = document.querySelector('.container');
     const sortDropdown = document.getElementById('sort-movies');
+
+
+
+
 
 
     const sortSelect = document.getElementById('sort-movies');
@@ -66,52 +365,108 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
 
-    searchForm.addEventListener('submit', (event) => {
-            event.preventDefault();
-            // Hide rated movies section
-            ratedMoviesSection.style.display = 'none';
+    if(searchForm){
+        searchForm.addEventListener('submit', (event) => {
+                event.preventDefault();
+                // Hide rated movies section
+                ratedMoviesSection.style.display = 'none';
 
-        });
+            });
+    }
+
     // Handle rating submission
     if (ratingButton) {
         ratingButton.addEventListener('click', async function() {
             const selectedRating = document.querySelector('input[name="rating"]:checked');
-            const movieDetails = document.querySelector('#movie-details');
-            const imdbID = movieDetails.getAttribute('data-id');
+            const moviePoster = document.getElementById('movie-poster');
+            const imdbID = moviePoster ? moviePoster.alt : null;
 
-            if (imdbID) {
+            console.log('IMDb ID:', imdbID);
+            console.log('Selected Rating:', selectedRating ? selectedRating.value : 'None');
+
+            const user = auth.currentUser;
+            console.log('Current user:', user);
+
+            if (user && imdbID) {
                 if (selectedRating) {
-                    const rating = selectedRating.value;
+                    const rating = parseFloat(selectedRating.value);
+                    const userId = user.uid;
 
-                    // Fetch movie details from OMDb API
+                    // Check if a rating from this user for this movie already exists
+                    const ratingQuery = query(
+                        collection(db, 'ratings'),
+                        where('userId', '==', userId),
+                        where('imdbID', '==', imdbID)
+                    );
+
                     try {
-                        const response = await fetch(`https://www.omdbapi.com/?i=${imdbID}&apikey=${apiKey}`);
-                        const movieData = await response.json();
+                        const querySnapshot = await getDocs(ratingQuery);
 
-                        if (movieData.Response === 'True') {
-                            const ratedMovie = {
-                                title: movieData.Title,
-                                poster: movieData.Poster,
-                                rating: rating
-                            };
-
-                            // Save the rating along with movie details to localStorage
-                            localStorage.setItem(imdbID, JSON.stringify(ratedMovie));
-                            document.getElementById('rating-response').innerText = `Thank you for rating "${movieData.Title}" ${rating}/5!`;
+                        if (!querySnapshot.empty) {
+                            // Update existing rating
+                            const docId = querySnapshot.docs[0].id;
+                            await updateDoc(doc(db, 'ratings', docId), {
+                                rating: rating,
+                                timestamp: new Date() // Optionally update timestamp
+                            });
+                            document.getElementById('rating-response').innerText = `Rating for "${querySnapshot.docs[0].data().title}" updated to ${rating}/5!`;
                         } else {
-                            document.getElementById('rating-response').innerText = 'Movie not found.';
+                            // Add new rating
+                            const movieResponse = await fetch(`https://www.omdbapi.com/?i=${imdbID}&apikey=${apiKey}`);
+                            const movieData = await movieResponse.json();
+
+                            if (movieData.Response === 'True') {
+                                const ratedMovie = {
+                                    userId: userId,
+                                    title: movieData.Title,
+                                    poster: movieData.Poster,
+                                    rating: rating,
+                                    imdbID: imdbID,
+                                    timestamp: new Date()
+                                };
+
+                                try {
+                                    await addDoc(collection(db, 'ratings'), ratedMovie);
+                                    document.getElementById('rating-response').innerText = `Thank you for rating "${movieData.Title}" ${rating}/5!`;
+                                } catch (error) {
+                                    console.error('Error saving rating:', error);
+                                    document.getElementById('rating-response').innerText = 'Error saving rating.';
+                                }
+                            } else {
+                                document.getElementById('rating-response').innerText = 'Movie not found.';
+                            }
                         }
                     } catch (error) {
-                        document.getElementById('rating-response').innerText = 'Error fetching movie details.';
+                        console.error('Error querying or updating rating:', error);
+                        document.getElementById('rating-response').innerText = 'Error processing rating.';
                     }
                 } else {
                     document.getElementById('rating-response').innerText = 'Please select a rating.';
                 }
             } else {
-                document.getElementById('rating-response').innerText = 'No movie selected.';
+                document.getElementById('rating-response').innerText = user ? 'No movie selected.' : 'You need to login to rate movies.';
             }
         });
     }
+
+if (commentsButton) {
+    commentsButton.addEventListener('click', async function() {
+        const moviePoster = document.getElementById('movie-poster');
+        const imdbID = moviePoster ? moviePoster.alt : null;
+
+        if (imdbID) {
+            document.location.href = `comments.html?imdbID=${imdbID}`;
+        } else {
+            console.error('IMDb ID not found.');
+        }
+    });
+}
+
+
+
+
+
+
 
     // Function to create a promise that resolves when an image is loaded
     function loadImage(src) {
@@ -124,102 +479,81 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    if (viewRatedMoviesButton) {
-        viewRatedMoviesButton.addEventListener('click', async function() {
-            resetSite();
-            ratedMoviesSection.style.display = 'block';
-            const ratedMovies = [];
+// Fetch rated movies from Firestore and display the user's ratings
+if (viewRatedMoviesButton) {
+    viewRatedMoviesButton.addEventListener('click', async function () {
+        resetMovieDetails();
+        resetSite();
 
-            // Retrieve all movies from localStorage
-            for (let i = 0; i < localStorage.length; i++) {
-                const key = localStorage.key(i);
-                const movieData = localStorage.getItem(key);
-                if (movieData) {
-                    const movie = JSON.parse(movieData);
-                    ratedMovies.push({ imdbID: key, ...movie });
-                }
-            }
+        ratedMoviesSection.style.display = 'block';
+        const ratedMovies = [];
 
-            // Fetch movie details from OMDb API for each rated movie
+        // Get the current authenticated user
+        const user = auth.currentUser;
+
+        if (user) {
             try {
-                const movieDetailsPromises = ratedMovies.map(async movie => {
-                    const response = await fetch(`https://www.omdbapi.com/?i=${movie.imdbID}&apikey=${apiKey}`);
-                    return response.json();
+                // Query Firestore to get ratings for the logged-in user
+                const q = query(collection(db, 'ratings'), where('userId', '==', user.uid));
+                const querySnapshot = await getDocs(q);
+
+                // Collect user's ratings
+                querySnapshot.forEach((doc) => {
+                    ratedMovies.push(doc.data());
                 });
 
-                const movieDetails = await Promise.all(movieDetailsPromises);
-
-                // Merge movie details with ratings
-                const moviesWithDetails = ratedMovies.map(movie => {
-                    const details = movieDetails.find(detail => detail.imdbID === movie.imdbID);
-                    return {
-                        ...movie,
-                        ...details,
-                        rating: parseFloat(movie.rating) || 0 // Convert rating to number
-                    };
-                });
-
-                // Sort movies based on the selected sort option
-                const sortOption = sortDropdown.value;
-                if (sortOption === 'rating') {
-                    moviesWithDetails.sort((a, b) => b.rating - a.rating); // Sort by rating descending
-                } else {
-                    moviesWithDetails.sort((a, b) => a.Title.localeCompare(b.Title)); // Sort by name alphabetically
-                }
-
-                // Display rated movies
+                // Display rated movies with the user's rating
                 const ratedMovieContainer = document.getElementById('rated-movie-container');
                 if (!ratedMovieContainer) {
                     console.error('Element with ID "rated-movie-container" not found');
                     return;
                 }
-                ratedMovieContainer.innerHTML = '';
-                for (const movie of moviesWithDetails) {
+                ratedMovieContainer.innerHTML = ''; // Clear previous content
+
+                // Fetch movie details for each rated movie
+                for (const movie of ratedMovies) {
+                    const response = await fetch(`https://www.omdbapi.com/?i=${movie.imdbID}&apikey=${apiKey}`);
+                    const details = await response.json();
+
                     const movieDiv = document.createElement('div');
                     movieDiv.className = 'rated-movie';
-                    movieDiv.style.background = `linear-gradient(rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.5)), url(${movie.Poster})`; // Apply background image
+                    movieDiv.style.background = `linear-gradient(rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.5)), url(${details.Poster})`;
 
-                    // Load the image and get the color
-                    try {
-                        const img = await loadImage(movie.Poster);
-                        const colorThief = new ColorThief();
-                        const dominantColor = rgbToHex(...colorThief.getColor(img));
-                        const textColor = getTextColor(dominantColor);
-
-                        movieDiv.innerHTML = `
-                            <div class="content">
-                                <img src="${movie.Poster}" alt="${movie.Title}" class="movie-poster" data-id="${movie.imdbID}">
-                                <div class="text-container" style="color: #ffffff;">
-                                    <strong>${movie.Title}</strong>
-                                    <p>Rating: ${JSON.parse(localStorage.getItem(movie.imdbID)).rating}/5</p>
-                                </div>
+                    movieDiv.innerHTML = `
+                        <div class="content">
+                            <img src="${details.Poster}" alt="${details.Title}" class="movie-poster" data-id="${movie.imdbID}">
+                            <div class="text-container" style="color: #ffffff;">
+                                <strong>${details.Title}</strong>
+                                <p>Your Rating: ${movie.rating}/5</p>
                             </div>
-                        `;
-                        ratedMovieContainer.appendChild(movieDiv);
-                    } catch (error) {
-                        console.error('Error loading image or getting color:', error);
-                    }
+                        </div>
+                    `;
+                    ratedMovieContainer.appendChild(movieDiv);
                 }
 
                 // Add click event listener to each movie poster
-                document.querySelectorAll('.movie-poster').forEach(poster => {
-                    poster.addEventListener('click', function() {
+                document.querySelectorAll('.movie-poster').forEach((poster) => {
+                    poster.addEventListener('click', function () {
                         const imdbID = this.getAttribute('data-id');
                         showMovieDetails(imdbID);
                     });
                 });
 
-                ratedMoviesSection.style.display = moviesWithDetails.length > 0 ? 'block' : 'none';
+                ratedMoviesSection.style.display = ratedMovies.length > 0 ? 'block' : 'none';
             } catch (error) {
-                console.error('Error fetching movie details:', error);
-                const ratedMovieContainer = document.getElementById('rated-movie-container');
-                if (ratedMovieContainer) {
-                    ratedMovieContainer.innerHTML = '<p>Error fetching movie details.</p>';
-                }
+                console.error('Error fetching ratings:', error);
+                document.getElementById('rated-movie-container').innerHTML = '<p>Error fetching movie details.</p>';
                 ratedMoviesSection.style.display = 'none';
             }
-        });
-    }
+        } else {
+            console.log('No user logged in.');
+            ratedMoviesSection.style.display = 'none';
+        }
+    });
+}
+
+
+
 
 
 
@@ -229,11 +563,33 @@ document.addEventListener('DOMContentLoaded', () => {
 
 
     // Define the function to show movie details
-    function showMovieDetails(imdbID) {
-        // Fetch and display movie details based on the imdbID
-        window.scrollTo(0,0);
-        fetchMovieDetails(imdbID); // Replace with your existing function to fetch and display movie details
+    async function showMovieDetails(imdbID) {
+        window.scrollTo(0, 0);
+        resetRatingStars(); // Reset stars before showing new movie
+        fetchMovieDetails(imdbID); // Fetch and display movie details
         ratedMoviesSection.style.display = 'none';
+
+        try {
+            // Query Firestore to get all ratings for the selected movie
+            const q = query(collection(db, 'ratings'), where('imdbID', '==', imdbID));
+            const querySnapshot = await getDocs(q);
+
+            const ratings = [];
+            querySnapshot.forEach((doc) => {
+                ratings.push(Number(doc.data().rating)); // Ensure ratings are numbers
+            });
+
+            // Calculate the average rating
+            const averageRating = ratings.length > 0 ? (ratings.reduce((sum, rating) => sum + rating, 0) / ratings.length).toFixed(1) : 'N/A';
+
+            // Display the average rating on the movie details page
+            const averageRatingElement = document.getElementById('average-rating');
+            averageRatingElement.innerText = `Average Rating: ${averageRating}/5`;
+
+        } catch (error) {
+            console.error('Error fetching average rating:', error);
+            document.getElementById('average-rating').innerText = 'Error fetching average rating';
+        }
     }
 
 function sortMovies(criteria) {
@@ -253,8 +609,13 @@ function sortMovies(criteria) {
             const titleB = b.querySelector('.text-container strong').innerText;
             return titleA.localeCompare(titleB);
         } else if (criteria === 'rating') {
-            const ratingA = JSON.parse(localStorage.getItem(imdbID_A)).rating;
-            const ratingB = JSON.parse(localStorage.getItem(imdbID_B)).rating;
+            const dataA = localStorage.getItem(imdbID_A);
+            const dataB = localStorage.getItem(imdbID_B);
+
+            // Default to 0 if no rating is found
+            const ratingA = dataA ? JSON.parse(dataA).rating : 0;
+            const ratingB = dataB ? JSON.parse(dataB).rating : 0;
+
             console.log(ratingA);
             console.log(ratingB);
             return ratingB - ratingA; // Sort descending by rating
@@ -284,7 +645,7 @@ function searchMovies(query) {
     document.getElementById('movie-details').style.display = 'none';
     document.getElementById('movie-list').style.display = 'flex';
     document.body.classList.remove('show-bg'); // Remove background blur
-    document.querySelector('.container').style.backgroundColor = 'rgb(255,255,255)';
+    document.querySelector('.container').style.backgroundColor = 'rgba(255,255,255, 0.7)';
 
     const button = document.querySelector('button');
     const button2 = document.getElementById('view-rated-movies');
@@ -409,101 +770,175 @@ function setRatingFromLocalStorage(imdbID) {
     }
 }
 
-// Function to fetch and display movie details
-function fetchMovieDetails(imdbID) {
+// Function to fetch and display movie details with average rating
+async function fetchMovieDetails(imdbID) {
     const apiKey = '97910366'; // Replace with your OMDb API key
     const url = `https://www.omdbapi.com/?i=${imdbID}&apikey=${apiKey}`;
 
-    fetch(url)
-        .then(response => response.json())
-        .then(data => {
-            if (data.Response === 'False') {
-                document.getElementById('movie-details').innerHTML = `<p>${data.Error}</p>`;
-                document.getElementById('movie-details').style.display = 'none';
-                document.getElementById('movie-list').style.display = 'flex';
-                resetMovieDetails();
-                document.body.classList.remove('show-bg');
-            } else {
-                resetMovieDetails();
-                resetRatingStars(); // Reset stars when fetching new details
+    try {
+        // Fetch movie details from OMDb API
+        const response = await fetch(url);
+        const data = await response.json();
+
+        if (data.Response === 'False') {
+            document.getElementById('movie-details').innerHTML = `<p>${data.Error}</p>`;
+            document.getElementById('movie-details').style.display = 'none';
+            document.getElementById('movie-list').style.display = 'flex';
+            resetMovieDetails();
+            document.body.classList.remove('show-bg');
+            return;
+        }
+
+        resetMovieDetails();
+        resetRatingStars(); // Reset stars when fetching new details
+
+        // Populate movie details
+        document.getElementById('movie-title').innerText = data.Title;
+        document.getElementById('movie-year').innerText = data.Year;
+        document.getElementById('movie-rated').innerText = data.Rated;
+        document.getElementById('movie-runtime').innerText = data.Runtime;
+        document.getElementById('movie-genre').innerText = data.Genre;
+        document.getElementById('movie-director').innerText = `Directed by: ${data.Director}`;
+        document.getElementById('movie-writer').innerText = `Written by: ${data.Writer}`;
+        document.getElementById('movie-actors').innerText = `Actors: ${data.Actors}`;
+        document.getElementById('movie-plot').innerText = data.Plot;
+        document.getElementById('movie-language').innerText = data.Language;
+        document.getElementById('movie-country').innerText = data.Country;
+        document.getElementById('movie-awards').innerText = `Awards: ${data.Awards}`;
+        document.getElementById('movie-boxoffice').innerText = `Grossed ${data.BoxOffice}`;
+        document.getElementById('movie-poster').src = data.Poster;
+        document.getElementById('movie-poster').alt = imdbID; // Set IMDb ID as alt attribute
+
+        document.body.style.setProperty('--bg-image', `url(${data.Poster})`);
+        document.body.classList.add('show-bg');
+        setRatingFromLocalStorage(imdbID);
+
+        // Fetch and display the average rating for the movie
+        await displayAverageRating(imdbID);
+
+        document.getElementById('movie-details').style.display = 'block';
+        document.getElementById('movie-list').style.display = 'none';
+
+        const colorThief = new ColorThief();
 
 
-                const movieDetailsElement = document.getElementById('movie-details');
-                movieDetailsElement.setAttribute('data-id', imdbID);
+        const img = new Image();
+        img.crossOrigin = 'Anonymous'; // Ensure CORS is handled
+        img.src = data.Poster;
+        const detailBox = document.getElementsByClassName('detail-box');
+        const container = document.getElementsByClassName('container');
+        const username = document.getElementsByClassName('username');
 
-                // Populate movie details
-                                document.getElementById('movie-title').innerText = data.Title;
-                                document.getElementById('movie-year').innerText = data.Year;
-                                document.getElementById('movie-rated').innerText = data.Rated;
-                                document.getElementById('movie-runtime').innerText = data.Runtime;
-                                document.getElementById('movie-genre').innerText = data.Genre;
-                                document.getElementById('movie-director').innerText = `Directed by: ${data.Director}`;
-                                document.getElementById('movie-writer').innerText = `Written by: ${data.Writer}`;
-                                document.getElementById('movie-actors').innerText = `Actors: ${data.Actors}`;
-                                document.getElementById('movie-plot').innerText = data.Plot;
-                                document.getElementById('movie-language').innerText = data.Language;
-                                document.getElementById('movie-country').innerText = data.Country;
-                                document.getElementById('movie-awards').innerText = `Awards: ${data.Awards}`;
-                                document.getElementById('movie-boxoffice').innerText = `Grossed ${data.BoxOffice}`;
-                                document.getElementById('movie-poster').src = data.Poster;
 
-                                document.body.style.setProperty('--bg-image', `url(${data.Poster})`);
-                                document.body.classList.add('show-bg');
-                                setRatingFromLocalStorage(imdbID);
+        img.onload = () => {
+            const [r, g, b] = colorThief.getColor(img);
+            const rgbaColor = `rgba(${r}, ${g}, ${b}, 0.7)`; // Convert RGB to RGBA with alpha 0.7
 
-                                // Wait for the image to load before using Color Thief
-                                const img = new Image();
-                                img.crossOrigin = 'Anonymous';
-                                img.src = data.Poster;
-                img.onload = function() {
-                                    const colorThief = new ColorThief();
-                                    const dominantColor = colorThief.getColor(img);
-                                    const colorHex = rgbToHex(dominantColor[0], dominantColor[1], dominantColor[2]);
+            // Calculate luminance for contrast ratio
+            const luminance = (r * 0.299 + g * 0.587 + b * 0.114) / 255;
+            const textColor = luminance > 0.5 ? 'black' : 'white'; // Choose black or white based on luminance
 
-                                    // Apply the extracted colors
-                                    document.querySelector('.container').style.backgroundColor = rgbToRgba("rgb("+dominantColor[0]+"," +dominantColor[1]+","+ dominantColor[2]+")",0.7);
-                                    document.querySelectorAll('#movie-details .detail-box').forEach(box => {
-                                        box.style.backgroundColor = colorHex;
-                                    });
-                                    document.querySelectorAll('#movie-details p').forEach(p => {
-                                        p.style.color = getTextColor(colorHex);
-                                    });
+            // Function to darken color
+            const darkenColor = (r, g, b, factor = 0.1) => { // Reduced factor to make it less dark
+                const newR = Math.max(0, r - factor * 255);
+                const newG = Math.max(0, g - factor * 255);
+                const newB = Math.max(0, b - factor * 255);
+                return `rgb(${Math.round(newR)}, ${Math.round(newG)}, ${Math.round(newB)})`;
+            };
 
-                                    const button = document.querySelector('button');
-                                    const button2 = document.getElementById('view-rated-movies');
+            const darkenedButtonColor = darkenColor(r, g, b, 0.1); // Slightly darker
+            const darkenedButtonHoverColor = darkenColor(r, g, b, 0.2); // Even darker for hover
 
-                                    button.style.backgroundColor = adjust(colorHex, -30); // Reset to the original color
-                                    button2.style.backgroundColor = adjust(colorHex, -30); // Reset to the original color
+            // Apply background color to all elements with the class 'detail-box'
+            Array.from(detailBox).forEach(box => {
+                box.style.backgroundColor = rgbaColor;
+            });
 
-                                    button.addEventListener('mouseover', () => {
-                                        button.style.backgroundColor = adjust(colorHex, -50); // Change to your desired color
-                                    });
+            Array.from(username).forEach(name => {
+                name.style.backgroundColor = rgbaColor;
+            });
 
-                                    button2.addEventListener('mouseover', () => {
-                                        button2.style.backgroundColor = adjust(colorHex, -50); // Change to your desired color
-                                    });
+            // Apply background color to all elements with the class 'container'
+            Array.from(container).forEach(cont => {
+                cont.style.backgroundColor = rgbaColor;
+            });
 
-                                    button.addEventListener('mouseout', () => {
-                                        button.style.backgroundColor = adjust(colorHex, -30); // Reset to the original color
-                                    });
+            // Apply darkened background color to all buttons
+            Array.from(document.querySelectorAll('button')).forEach(button => {
+                button.style.backgroundColor = darkenedButtonColor;
+                // Add hover effect
+                button.addEventListener('mouseover', () => {
+                    button.style.backgroundColor = darkenedButtonHoverColor;
+                });
+                button.addEventListener('mouseout', () => {
+                    button.style.backgroundColor = darkenedButtonColor;
+                });
+            });
 
-                                    button2.addEventListener('mouseout', () => {
-                                        button2.style.backgroundColor = adjust(colorHex, -30); // Reset to the original color
-                                    });
-                                    // Set color for h1 and specific text elements
-                                    document.querySelector('h1').style.color = getTextColor(colorHex);
-                                    document.getElementById('movie-title').style.color = getTextColor(colorHex);
-                                    document.getElementById('movie-rating').querySelector('label').style.color = getTextColor(colorHex);
-                                };
+            // Apply text color to all elements except radio button labels
+            Array.from(document.querySelectorAll('body *')).forEach(element => {
+                const tagName = element.tagName.toLowerCase();
+                const isRadioLabel = tagName === 'label' && element.previousElementSibling &&
+                                     element.previousElementSibling.tagName.toLowerCase() === 'input' &&
+                                     element.previousElementSibling.type === 'radio';
 
-                                document.getElementById('movie-details').style.display = 'block';
-                                document.getElementById('movie-list').style.display = 'none';
-                            }
-                        })
-                        .catch(error => {
-                            console.error('Error fetching movie details:', error);
-                        });
+                // Avoid changing the color of radio button labels and elements that are already styled with different colors
+                const currentBackgroundColor = window.getComputedStyle(element).backgroundColor;
+                if (!isRadioLabel && currentBackgroundColor !== rgbaColor) {
+                    element.style.color = textColor;
+                }
+            });
+        };
+
+
+
+    } catch (error) {
+        console.error('Error fetching movie details:', error);
+        document.getElementById('movie-details').innerHTML = '<p>Failed to fetch movie details.</p>';
+    }
 }
+
+// Function to fetch and display the average rating of a movie
+async function displayAverageRating(imdbID) {
+    try {
+        // Query Firestore to get all ratings for the selected movie
+        const q = query(collection(db, 'ratings'), where('imdbID', '==', imdbID));
+        const querySnapshot = await getDocs(q);
+
+        const ratings = [];
+        querySnapshot.forEach((doc) => {
+            ratings.push(Number(doc.data().rating)); // Ensure ratings are numbers
+        });
+
+        // Calculate the average rating
+        const averageRating = ratings.length > 0
+            ? (ratings.reduce((sum, rating) => sum + rating, 0) / ratings.length).toFixed(1)
+            : 'N/A';
+
+        // Find the existing average rating element or create a new one
+        let averageRatingElement = document.getElementById('average-rating');
+        if (!averageRatingElement) {
+            // If the element doesn't exist, create it
+            averageRatingElement = document.createElement('p');
+            averageRatingElement.id = 'average-rating';
+            document.getElementById('movie-details').appendChild(averageRatingElement);
+        }
+
+        // Update the text of the average rating element
+        averageRatingElement.innerText = `Average Rating: ${averageRating}/5`;
+
+    } catch (error) {
+        console.error('Error fetching average rating:', error);
+        let averageRatingElement = document.getElementById('average-rating');
+        if (!averageRatingElement) {
+            averageRatingElement = document.createElement('p');
+            averageRatingElement.id = 'average-rating';
+            document.getElementById('movie-details').appendChild(averageRatingElement);
+        }
+        averageRatingElement.innerText = 'Error fetching average rating';
+    }
+}
+
 
 
 // Utility function to convert RGB to Hex
@@ -556,39 +991,67 @@ function resetMovieDetails() {
     document.body.style.setProperty('--bg-image', 'none');
     document.body.classList.remove('show-bg');
 
+    Array.from(document.querySelectorAll('button')).forEach(button => {
+                    button.style.backgroundColor = '#007bff';
+                    // Add hover effect
+                    button.addEventListener('mouseover', () => {
+                        button.style.backgroundColor = '#0056b3';
+                    });
+                    button.addEventListener('mouseout', () => {
+                        button.style.backgroundColor = '#007bff';
+                    });
+                });
+
+
     // Reset container background color
     const container = document.querySelector('.container');
     if (container) {
-        container.style.backgroundColor = 'rgb(255,255,255)';
+        container.style.backgroundColor = 'rgba(255,255,255, 0.7)';
     }
 
-    // Reset colors for detail boxes and text
+    const username = document.getElementsByClassName('username');
+    Array.from(username).forEach(name => {
+        name.style.backgroundColor = 'rgba(255,255,255, 0.7)';
+    });
+
+    // Reset colors for detail boxes
     const detailBoxes = document.querySelectorAll('#movie-details .detail-box');
     detailBoxes.forEach(box => {
         box.style.backgroundColor = '';
     });
 
-    const paragraphs = document.querySelectorAll('#movie-details p');
-    paragraphs.forEach(p => {
-        p.style.color = '';
+    // Reset button styles
+    Array.from(document.querySelectorAll('button')).forEach(button => {
+        button.style.backgroundColor = ''; // Remove inline background color
+        button.style.color = ''; // Remove inline text color
+        button.style.border = ''; // Remove inline border
+
+        // Remove any hover effects applied directly
+        button.classList.remove('button-hover');
     });
 
-    const h1 = document.querySelector('h1');
-    if (h1) {
-        h1.style.color = '';
-    }
+    // Reset text color for general elements and radio button labels
+    Array.from(document.querySelectorAll('body *')).forEach(element => {
+        const tagName = element.tagName.toLowerCase();
+        const isRadioLabel = tagName === 'label' && element.previousElementSibling &&
+                             element.previousElementSibling.tagName.toLowerCase() === 'input' &&
+                             element.previousElementSibling.type === 'radio';
 
-    const movieTitle = document.getElementById('movie-title');
-    if (movieTitle) {
-        movieTitle.style.color = '';
-    }
+        if (!isRadioLabel) {
+            element.style.color = ''; // Reset text color
+        }
+    });
 
-    const movieRatingLabel = document.getElementById('movie-rating')?.querySelector('label');
-    if (movieRatingLabel) {
-        movieRatingLabel.style.color = '';
-    }
+    // Reset colors for radio button labels
+    Array.from(document.querySelectorAll('label')).forEach(label => {
+        const input = label.previousElementSibling;
+        if (input && input.tagName.toLowerCase() === 'input' && input.type === 'radio') {
+            label.style.color = ''; // Reset color for radio button labels
+        }
+    });
+
+    // Optionally reset any other specific styles or attributes that were changed
 }
-
 
 function rgbToRgba(rgb, alpha) {
     // Check if rgb is a string and contains 'rgb('
