@@ -8,7 +8,7 @@ body {
     align-items: center;
     min-height: 100vh;
     position: relative;
-    background-image: url("background.jpg");
+    background-image: url("background.png");
 }
 
 body::before {
