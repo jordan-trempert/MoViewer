@@ -151,8 +151,12 @@ document.addEventListener('DOMContentLoaded', async () => {
 
                 img.onload = () => {
                     const [r, g, b] = colorThief.getColor(img);
-                    const rgbaColor = `rgba(${r}, ${g}, ${b}, 0.7)`; // Convert RGB to RGBA with alpha 0.7
+                    const rgbaColor = `rgba(${r}, ${g}, ${b}, 0.4)`; // Convert RGB to RGBA with alpha 0.7
                     containerBG.style.backgroundColor = rgbaColor;
+                    containerBG.style.backdropFilter = 'blur(10px)'; // Add blur for glass effect
+                    containerBG.style.webkitBackdropFilter = 'blur(10px)'; // Support for Safari
+                    containerBG.style.border = '1px solid rgba(255, 255, 255, 0.3)'; // Border for frosted glass look
+
 
                     // Calculate the opposite color for the text
                     const oppositeColor = `rgb(${255 - r}, ${255 - g}, ${255 - b})`;
@@ -334,7 +338,11 @@ document.addEventListener('DOMContentLoaded', () => {
             searchInput.value = ''; // Clear the search input
             movieList.innerHTML = ''; // Clear the search results list
             movieDetails.style.display = 'none'; // Hide the movie details section
-            container.style.backgroundColor = ''; // Reset background color
+            if (container) {
+                container.style.backgroundColor = 'rgba(255, 255, 255, 0.4)'; // Keep transparency
+                container.style.backdropFilter = 'blur(10px)'; // Reapply the blur
+                container.style.border = '1px solid rgba(255, 255, 255, 0.3)'; // Reapply border
+            }
             container.querySelectorAll('.detail-box').forEach(box => box.style.backgroundColor = ''); // Reset container color
             document.body.style.setProperty('--bg-image', 'none');
             document.body.classList.remove('show-bg');
@@ -1008,7 +1016,9 @@ function resetMovieDetails() {
     // Reset container background color
     const container = document.querySelector('.container');
     if (container) {
-        container.style.backgroundColor = 'rgba(255,255,255, 0.7)';
+        container.style.backgroundColor = 'rgba(255,255,255, 0.4)';
+        container.style.backdropFilter = 'blur(10px)'; // Reapply the blur
+        container.style.border = '1px solid rgba(255, 255, 255, 0.3)'; // Reapply border
     }
 
     const username = document.getElementsByClassName('username');
