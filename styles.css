@@ -35,7 +35,7 @@ body.show-bg::before {
 .container {
     max-width: 900px;
     width: 100%;
-    background: rgba(255, 255, 255, 0.7); /* Slight transparency */
+    background: rgba(255, 255, 255, 0.3); /* Slight transparency */
     padding: 20px;
     border-radius: 16px; /* Rounded corners */
     box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1); /* Subtle shadow */
