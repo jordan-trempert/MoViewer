@@ -1,6 +1,5 @@
 body {
     font-family: 'Arial', sans-serif;
-    background-color: #f4f4f4;
     margin: 0;
     padding: 0;
     display: flex;
@@ -8,7 +7,8 @@ body {
     align-items: center;
     min-height: 100vh;
     position: relative;
-    background-image: url("background.png");
+    background: rgb(223,0,255);
+    background: linear-gradient(90deg, rgba(223,0,255,1) 0%, rgba(0,69,255,1) 100%);
 }
 
 body::before {
