@@ -644,7 +644,10 @@ function searchMovies(query) {
     document.getElementById('movie-details').style.display = 'none';
     document.getElementById('movie-list').style.display = 'flex';
     document.body.classList.remove('show-bg'); // Remove background blur
-    document.querySelector('.container').style.backgroundColor = 'rgba(255,255,255, 0.7)';
+    document.querySelector('.container').style.background = 'rgba(255,255,255, 0.4)';
+    //document.querySelector('.container').style.backgroundColor = 'rgba(255,255,255, 0.7)';
+
+    
 
     const button = document.querySelector('button');
     const button2 = document.getElementById('view-rated-movies');
@@ -831,7 +834,7 @@ async function fetchMovieDetails(imdbID) {
 
         img.onload = () => {
             const [r, g, b] = colorThief.getColor(img);
-            const rgbaColor = `rgba(${r}, ${g}, ${b}, 0.7)`; // Convert RGB to RGBA with alpha 0.7
+            const rgbaColor = `rgba(${r}, ${g}, ${b}, 0.4)`; // Convert RGB to RGBA with alpha 0.7
 
             // Calculate luminance for contrast ratio
             const luminance = (r * 0.299 + g * 0.587 + b * 0.114) / 255;
